@@ -1,0 +1,8 @@
+{
+  "source": "cisa-kev",
+  "url": "scripts/fixtures/kev-sample.json",
+  "count": 2,
+  "catalogVersion": "2026.08.14",
+  "dateReleased": "2026-08-14T00:00:00.000Z",
+  "fetched_at": "2026-08-14"
+}

@@ -1,0 +1,28 @@
+Delivered-To: carl@carls-employer.com
+Received: by 2002:a05:6402:1234:b0:52d:e2f1:0 with SMTP id z9csp2841193edb;
+        Tue, 19 Aug 2026 10:22:34 -0700 (PDT)
+Received: from mx01.carls-employer.com (mx01.carls-employer.com [198.51.100.7])
+        by mail.carls-employer.com (Postfix) with ESMTPS id 4Wx8Kq2mNBz3hT9
+        for <carl@carls-employer.com>; Tue, 19 Aug 2026 10:22:33 -0700 (PDT)
+Received: from mail-pj1-f172.google.com (mail-pj1-f172.google.com [209.85.216.172])
+        by mx01.carls-employer.com (Postfix) with ESMTPS id 4Wx8Kq1QpZz3hT8
+        for <carl@carls-employer.com>; Tue, 19 Aug 2026 10:22:32 -0700 (PDT)
+Received: by mail-pj1-f172.google.com with SMTP id 98e67ed59e1d1-31f2b8a1c93so
+        for <carl@carls-employer.com>; Tue, 19 Aug 2026 10:22:31 -0700 (PDT)
+Authentication-Results: mx01.carls-employer.com;
+        dkim=pass header.i=@shipping-notices.example.com header.s=s1 header.b=Qk9xTt2L;
+        spf=pass (mx01.carls-employer.com: domain of bounces@shipping-notices.example.com
+        designates 209.85.216.172 as permitted sender) smtp.mailfrom=bounces@shipping-notices.example.com;
+        dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=shipping-notices.example.com
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=shipping-notices.example.com; s=s1; t=1786295551;
+        h=to:subject:message-id:date:from:mime-version;
+        bh=Ib1r0mfhZ0GdVMPPMlNuAd9pOK5TxBaMTLQMzcsCcqk=;
+        b=Qk9xTt2Lmc9Wl0kQwZ0hqRr4pE7c5nQ
+Return-Path: <bounces@shipping-notices.example.com>
+From: Shipping Notices <noreply@shipping-notices.example.com>
+To: carl@carls-employer.com
+Subject: Your package is out for delivery
+Message-ID: <CAF9x3mQ8vN1kZ2rT@shipping-notices.example.com>
+Date: Tue, 19 Aug 2026 10:22:30 -0700
+MIME-Version: 1.0

@@ -1,0 +1,37 @@
+Received: from DM6PR12MB4287.namprd12.prod.outlook.com (2603:10b6:5:1e6::14) by
+ SA1PR12MB5678.namprd12.prod.outlook.com (2603:10b6:806:1a2::7) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.7918.20; Tue, 19 Aug 2026 17:22:33 +0000
+Received: from CO1NAM11FT034.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:806:1a2:cafe::b8) by CO1PEPF000042A9.outlook.office365.com
+ (2603:10b6:806:1a2::7) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7918.20 via Frontend
+ Transport; Tue, 19 Aug 2026 17:22:32 +0000
+Received: from mailer.random-vps.tld (203.0.113.44) by
+ CO1NAM11FT034.mail.protection.outlook.com (10.13.174.238) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.7918.20 via Frontend Transport; Tue, 19 Aug 2026 17:22:31 +0000
+Received: from mail.yourbank.example (smtp.yourbank.example [192.0.2.10])
+        by mail.yourbank.example (Postfix) with ESMTP id 8823A4410F
+        for <carl@carls-employer.com>; Tue, 19 Aug 2026 17:22:29 +0000
+Received: from localhost (localhost [127.0.0.1])
+        by smtp.yourbank.example (Postfix) with ESMTP id 5510B221C4;
+        Tue, 19 Aug 2026 17:22:28 +0000
+Authentication-Results: spf=pass (sender IP is 203.0.113.44)
+ smtp.mailfrom=mailer.random-vps.tld; dkim=pass (signature was verified)
+ header.d=mailer.random-vps.tld; dmarc=fail action=oreject
+ header.from=yourbank.example; compauth=fail reason=000
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mailer.random-vps.tld;
+ s=default; t=1786310551; bh=cKq0Fk3nZ1vTt8mLpQr7wXy2dEsA4hJ6uNb0iOgVc5M=;
+ h=From:To:Subject:Date; b=Rv7pQ2sLm4nB8cXe0
+Return-Path: <bounce@mailer.random-vps.tld>
+From: "YourBank Security" <security@yourbank.example>
+Reply-To: recovery@secure-yourbank-verify.tld
+To: carl@carls-employer.com
+Subject: =?utf-8?B?VXJnZW50OiB2ZXJpZnkgeW91ciBhY2NvdW50?=
+Date: Tue, 19 Aug 2026 17:22:27 +0000
+Message-ID: <20260819172227.5510B221C4@mailer.random-vps.tld>
+X-Originating-IP: [198.18.7.99]
+X-Mailer: PHPMailer 6.8.0 (https://github.com/PHPMailer/PHPMailer)
+List-Unsubscribe: <https://secure-yourbank-verify.tld/u/9f2a1c>
+MIME-Version: 1.0

@@ -1,0 +1,48 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.env
+.env.*
+!.env.example
+!**/.env.example
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+# Root-anchored: the runtime data directory only. An unanchored `data/`
+# also matched src/umbra/crypto/data/, so the shipped service registry was
+# never committed and every registry test failed inside the deploy image
+# while passing locally.
+/data/
+*.db
+*.sqlite
+*.log
+
+# Local Claude Code settings (machine-specific infra access)
+.claude/settings.local.json

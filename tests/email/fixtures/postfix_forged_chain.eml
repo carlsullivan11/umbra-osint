@@ -1,0 +1,23 @@
+Received: from relay02.carls-employer.com (relay02.carls-employer.com [10.20.0.6])
+	by mail.carls-employer.com (Postfix) with ESMTPS id 3Kp2Vn6xQ1z
+	for <carl@carls-employer.com>; Tue, 19 Aug 2026 09:14:03 -0700 (PDT)
+Received: from unknown (HELO mail.irs-refund.example) (185.199.108.153)
+	by relay02.carls-employer.com (Postfix) with SMTP id 9Ff4Rt1bLm2
+	for <carl@carls-employer.com>; Tue, 19 Aug 2026 09:14:02 -0700 (PDT)
+Received: from mail.treasury.gov (mail.treasury.gov [23.55.161.10])
+	by mail.irs-refund.example (Postfix) with ESMTP id 771C2A0B
+	for <carl@carls-employer.com>; Tue, 19 Aug 2026 09:13:58 -0700 (PDT)
+Received: from secure.treasury.gov (secure.treasury.gov [23.55.161.11])
+	by mail.treasury.gov (Postfix) with ESMTP id 118D4E77;
+	Tue, 19 Aug 2026 09:13:55 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by secure.treasury.gov (Postfix) with ESMTP id 004A1C39;
+	Tue, 19 Aug 2026 09:13:51 -0700 (PDT)
+Return-Path: <refunds@irs-refund.example>
+From: "IRS Refund Department" <refunds@treasury.gov>
+To: carl@carls-employer.com
+Subject: Notice: unclaimed federal refund #4471-B
+Date: Tue, 19 Aug 2026 09:13:50 -0700
+Message-ID: <004A1C39.refunds@irs-refund.example>
+X-Mailer: Microsoft Outlook Express 6.00.2900.5512
+MIME-Version: 1.0

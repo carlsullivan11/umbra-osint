@@ -1,0 +1,1565 @@
+{
+  "us-ar-benton": {
+    "portals": [
+      {
+        "name": "Benton County AR Assessor",
+        "url": "https://www.bentoncountyar.gov/assessor/",
+        "kind": "property"
+      },
+      {
+        "name": "Benton County AR Circuit Clerk",
+        "url": "https://www.bentoncountyar.gov/circuit-clerk/",
+        "kind": "courts"
+      },
+      {
+        "name": "Benton County AR County Clerk",
+        "url": "https://www.bentoncountyar.gov/county-clerk/",
+        "kind": "vital"
+      },
+      {
+        "name": "Benton County AR property / GIS (Beacon or county GIS)",
+        "url": "https://www.bentoncountyar.gov/",
+        "kind": "property"
+      }
+    ],
+    "cities": [
+      "bentonville",
+      "rogers",
+      "centerton",
+      "bella vista",
+      "peel",
+      "benton county"
+    ],
+    "state": "AR",
+    "county": "Benton",
+    "fips": "05007"
+  },
+  "us-ar-madison": {
+    "portals": [
+      {
+        "name": "Madison County AR",
+        "url": "https://madisoncountyar.gov/",
+        "kind": "government"
+      },
+      {
+        "name": "Madison County AR Circuit Court",
+        "url": "https://madisoncountyar.gov/circuit_court.php",
+        "kind": "courts"
+      },
+      {
+        "name": "Madison County AR Clerk",
+        "url": "https://madisoncountyar.gov/clerk.php",
+        "kind": "vital"
+      }
+    ],
+    "cities": [
+      "huntsville ar"
+    ],
+    "state": "AR",
+    "county": "Madison",
+    "fips": "05087"
+  },
+  "us-ar-pulaski": {
+    "portals": [
+      {
+        "name": "Pulaski County AR Assessor",
+        "url": "https://pulaskicountyassessor.net/",
+        "kind": "property"
+      },
+      {
+        "name": "Pulaski County AR Clerk",
+        "url": "https://pulaskiclerkar.gov/",
+        "kind": "vital"
+      },
+      {
+        "name": "Pulaski County AR",
+        "url": "https://www.pulaskicounty.net/",
+        "kind": "government"
+      }
+    ],
+    "cities": [
+      "pulaski county",
+      "little rock",
+      "north little rock",
+      "jacksonville ar",
+      "maumelle",
+      "sherwood ar"
+    ],
+    "state": "AR",
+    "county": "Pulaski",
+    "fips": "05119"
+  },
+  "us-ar-sebastian": {
+    "portals": [
+      {
+        "name": "Sebastian County AR Assessor",
+        "url": "https://www.sebastiancountyar.gov/departments/county-assessor",
+        "kind": "property"
+      },
+      {
+        "name": "Sebastian County AR",
+        "url": "https://www.sebastiancountyar.gov/",
+        "kind": "government"
+      }
+    ],
+    "cities": [
+      "fort smith",
+      "sebastian county",
+      "greenwood ar",
+      "barling"
+    ],
+    "state": "AR",
+    "county": "Sebastian",
+    "fips": "05131"
+  },
+  "us-ar-washington": {
+    "portals": [
+      {
+        "name": "Washington County AR Assessor",
+        "url": "https://www.washingtoncountyar.gov/government/departments-a-e/assessor",
+        "kind": "property"
+      },
+      {
+        "name": "Washington County AR Circuit Clerk",
+        "url": "https://www.washingtoncountyar.gov/government/departments-a-e/circuit-clerk",
+        "kind": "courts"
+      },
+      {
+        "name": "Fayetteville AR city site",
+        "url": "https://www.fayetteville-ar.gov/",
+        "kind": "government"
+      }
+    ],
+    "cities": [
+      "fayetteville",
+      "springdale",
+      "siloam",
+      "elkins",
+      "prairie grove"
+    ],
+    "state": "AR",
+    "county": "Washington",
+    "fips": "05143"
+  },
+  "us-az-maricopa": {
+    "portals": [
+      {
+        "name": "Maricopa County Assessor",
+        "url": "https://mcassessor.maricopa.gov/",
+        "kind": "property"
+      },
+      {
+        "name": "Maricopa County Superior Court",
+        "url": "https://superiorcourt.maricopa.gov/",
+        "kind": "courts"
+      }
+    ],
+    "cities": [
+      "maricopa",
+      "phoenix",
+      "scottsdale",
+      "mesa, az",
+      "tempe",
+      "chandler az",
+      "glendale az"
+    ],
+    "state": "AZ",
+    "county": "Maricopa",
+    "fips": "04013"
+  },
+  "us-az-pima": {
+    "state": "AZ",
+    "county": "Pima",
+    "cities": [
+      "tucson",
+      "pima county",
+      "oro valley",
+      "marana"
+    ],
+    "portals": [
+      {
+        "name": "Pima County Assessor",
+        "url": "https://www.asr.pima.gov/",
+        "kind": "property"
+      },
+      {
+        "name": "Pima County Superior Court",
+        "url": "https://www.sc.pima.gov/",
+        "kind": "courts"
+      }
+    ],
+    "fips": "04019"
+  },
+  "us-ca-alameda": {
+    "portals": [
+      {
+        "name": "Alameda County Assessor",
+        "url": "https://www.acgov.org/assessor/",
+        "kind": "property"
+      },
+      {
+        "name": "Alameda County Clerk-Recorder",
+        "url": "https://www.acgov.org/auditor/clerk/",
+        "kind": "vital"
+      },
+      {
+        "name": "Alameda County Superior Court",
+        "url": "https://www.alameda.courts.ca.gov/",
+        "kind": "courts"
+      }
+    ],
+    "cities": [
+      "alameda",
+      "oakland",
+      "berkeley",
+      "fremont",
+      "hayward",
+      "san leandro"
+    ],
+    "state": "CA",
+    "county": "Alameda",
+    "fips": "06001"
+  },
+  "us-ca-contra-costa": {
+    "portals": [
+      {
+        "name": "Contra Costa Assessor",
+        "url": "https://www.contracosta.ca.gov/4823/Assessor",
+        "kind": "property"
+      },
+      {
+        "name": "Contra Costa Clerk-Recorder",
+        "url": "https://www.contracosta.ca.gov/277/Clerk-Recorder",
+        "kind": "vital"
+      },
+      {
+        "name": "Contra Costa Superior Court",
+        "url": "https://www.cc-courts.org/",
+        "kind": "courts"
+      }
+    ],
+    "cities": [
+      "contra costa",
+      "concord",
+      "walnut creek",
+      "pleasant hill",
+      "richmond ca",
+      "antioch",
+      "el cerrito"
+    ],
+    "state": "CA",
+    "county": "Contra Costa",
+    "fips": "06013"
+  },
+  "us-ca-marin": {
+    "portals": [
+      {
+        "name": "Marin County Assessor-Recorder",
+        "url": "https://www.marincounty.gov/departments/assessor-recorder",
+        "kind": "property"
+      },
+      {
+        "name": "Marin County Superior Court",
+        "url": "https://www.marin.courts.ca.gov/",
+        "kind": "courts"
+      }
+    ],
+    "cities": [
+      "marin county",
+      "san rafael",
+      "novato",
+      "mill valley",
+      "sausalito",
+      "tiburon"
+    ],
+    "state": "CA",
+    "county": "Marin",
+    "fips": "06041"
+  },
+  "us-ca-napa": {
+    "portals": [
+      {
+        "name": "Napa County Assessor",
+        "url": "https://www.napacounty.gov/149/Assessor",
+        "kind": "property"
+      },
+      {
+        "name": "Napa County Superior Court",
+        "url": "https://www.napa.courts.ca.gov/",
+        "kind": "courts"
+      }
+    ],
+    "cities": [
+      "napa county",
+      "napa,",
+      "napa ca",
+      "yountville",
+      "st. helena",
+      "calistoga"
+    ],
+    "state": "CA",
+    "county": "Napa",
+    "fips": "06055"
+  },
+  "us-ca-orange": {
+    "portals": [
+      {
+        "name": "Orange County CA Assessor",
+        "url": "https://www.ocassessor.gov/",
+        "kind": "property"
+      },
+      {
+        "name": "Orange County Superior Court",
+        "url": "https://www.occourts.org/",
+        "kind": "courts"
+      }
+    ],
+    "cities": [
+      "orange county, ca",
+      "anaheim",
+      "irvine",
+      "santa ana",
+      "huntington beach",
+      "costa mesa"
+    ],
+    "state": "CA",
+    "county": "Orange",
+    "fips": "06059"
+  },
+  "us-ca-riverside": {
+    "portals": [
+      {
+        "name": "Riverside County Assessor-Clerk-Recorder",
+        "url": "https://www.rivcoacr.org/",
+        "kind": "property"
+      }
+    ],
+    "cities": [
+      "riverside county",
+      "riverside, ca",
+      "corona, ca",
+      "moreno valley",
+      "temecula"
+    ],
+    "state": "CA",
+    "county": "Riverside",
+    "fips": "06065"
+  },
+  "us-ca-sacramento": {
+    "portals": [
+      {
+        "name": "Sacramento County Assessor",
+        "url": "https://assessor.saccounty.gov/",
+        "kind": "property"
+      }
+    ],
+    "cities": [
+      "sacramento",
+      "elk grove",
+      "roseville, ca",
+      "citrus heights"
+    ],
+    "state": "CA",
+    "county": "Sacramento",
+    "fips": "06067"
+  },
+  "us-ca-san-diego": {
+    "portals": [
+      {
+        "name": "San Diego County Assessor/Recorder/Clerk",
+        "url": "https://arcc.sdcounty.ca.gov/",
+        "kind": "property"
+      },
+      {
+        "name": "San Diego County Superior Court",
+        "url": "https://www.sdcourt.ca.gov/",
+        "kind": "courts"
+      },
+      {
+        "name": "San Diego County vital records (PHS)",
+        "url": "https://www.sandiegocounty.gov/content/sdc/hhsa/programs/phs/vital_records.html",
+        "kind": "vital"
+      }
+    ],
+    "cities": [
+      "san diego",
+      "chula vista",
+      "la jolla",
+      "carlsbad",
+      "oceanside",
+      "coronado",
+      "escondido"
+    ],
+    "state": "CA",
+    "county": "San Diego",
+    "fips": "06073"
+  },
+  "us-ca-san-mateo": {
+    "portals": [
+      {
+        "name": "San Mateo County Assessor-Clerk-Recorder",
+        "url": "https://www.smcacre.org/",
+        "kind": "property"
+      },
+      {
+        "name": "San Mateo County Superior Court",
+        "url": "https://www.sanmateocourt.org/",
+        "kind": "courts"
+      }
+    ],
+    "cities": [
+      "san mateo",
+      "millbrae",
+      "burlingame",
+      "redwood city",
+      "foster city",
+      "pacifica"
+    ],
+    "state": "CA",
+    "county": "San Mateo",
+    "fips": "06081"
+  },
+  "us-ca-santa-clara": {
+    "portals": [
+      {
+        "name": "Santa Clara County Assessor",
+        "url": "https://www.sccassessor.org/",
+        "kind": "property"
+      },
+      {
+        "name": "Santa Clara County Clerk-Recorder",
+        "url": "https://www.clerkrecorder.org/",
+        "kind": "vital"
+      },
+      {
+        "name": "Santa Clara Superior Court",
+        "url": "https://www.scscourt.org/",
+        "kind": "courts"
+      }
+    ],
+    "cities": [
+      "santa clara",
+      "san jose",
+      "sunnyvale",
+      "palo alto",
+      "mountain view",
+      "cupertino"
+    ],
+    "state": "CA",
+    "county": "Santa Clara",
+    "fips": "06085"
+  },
+  "us-ca-sf": {
+    "portals": [
+      {
+        "name": "SF Assessor-Recorder",
+        "url": "https://www.sfassessor.org/",
+        "kind": "property"
+      },
+      {
+        "name": "SF Superior Court",
+        "url": "https://sf.courts.ca.gov/",
+        "kind": "courts"
+      },
+      {
+        "name": "SF Dept. of Public Health \u2014 vital records",
+        "url": "https://www.sf.gov/departments--department-public-health",
+        "kind": "vital"
+      }
+    ],
+    "cities": [
+      "san francisco",
+      "soma",
+      "mission district",
+      "embarcadero"
+    ],
+    "state": "CA",
+    "county": "San Francisco",
+    "fips": "06075"
+  },
+  "us-ca-solano": {
+    "portals": [
+      {
+        "name": "Solano County Assessor-Recorder",
+        "url": "https://www.solanocounty.gov/government/assessorrecorder",
+        "kind": "property"
+      },
+      {
+        "name": "Solano County",
+        "url": "https://www.solanocounty.gov/",
+        "kind": "government"
+      }
+    ],
+    "cities": [
+      "solano",
+      "vallejo",
+      "fairfield",
+      "vacaville",
+      "benicia",
+      "suisun"
+    ],
+    "state": "CA",
+    "county": "Solano",
+    "fips": "06095"
+  },
+  "us-ca-sonoma": {
+    "portals": [
+      {
+        "name": "Sonoma County Assessor / Clerk-Recorder",
+        "url": "https://sonomacounty.gov/administrative-support-and-fiscal-services/clerk-recorder-assessor-registrar-of-voters",
+        "kind": "property"
+      },
+      {
+        "name": "Sonoma County Superior Court",
+        "url": "https://sonoma.courts.ca.gov/",
+        "kind": "courts"
+      }
+    ],
+    "cities": [
+      "sonoma county",
+      "santa rosa",
+      "petaluma",
+      "rohnert park",
+      "sebastopol"
+    ],
+    "state": "CA",
+    "county": "Sonoma",
+    "fips": "06097"
+  },
+  "us-co-denver": {
+    "portals": [
+      {
+        "name": "City and County of Denver Assessor",
+        "url": "https://www.denvergov.org/Assessor",
+        "kind": "property"
+      },
+      {
+        "name": "Colorado Judicial \u2014 Denver district",
+        "url": "https://www.coloradojudicial.gov/trial-courts-county",
+        "kind": "courts"
+      }
+    ],
+    "cities": [
+      "denver, co",
+      "denver co",
+      "denver county"
+    ],
+    "state": "CO",
+    "county": "Denver",
+    "fips": "08031"
+  },
+  "us-ct-hartford": {
+    "state": "CT",
+    "county": "Hartford",
+    "cities": [
+      "hartford",
+      "west hartford",
+      "new britain",
+      "hartford county"
+    ],
+    "portals": [
+      {
+        "name": "City of Hartford Assessor",
+        "url": "https://www.hartfordct.gov/Government/Departments/Assessor",
+        "kind": "property"
+      }
+    ],
+    "fips": "09003"
+  },
+  "us-fl-broward": {
+    "portals": [
+      {
+        "name": "Broward County Property Appraiser",
+        "url": "https://web.bcpa.net/",
+        "kind": "property"
+      },
+      {
+        "name": "17th Judicial Circuit (Broward)",
+        "url": "https://www.17th.flcourts.org/",
+        "kind": "courts"
+      }
+    ],
+    "cities": [
+      "broward",
+      "fort lauderdale",
+      "hollywood beach",
+      "pembroke pines",
+      "hollywood hills"
+    ],
+    "state": "FL",
+    "county": "Broward",
+    "fips": "12011"
+  },
+  "us-fl-duval": {
+    "state": "FL",
+    "county": "Duval",
+    "cities": [
+      "jacksonville, fl",
+      "jacksonville fl",
+      "duval"
+    ],
+    "portals": [
+      {
+        "name": "Duval / Jacksonville Property Appraiser",
+        "url": "https://www.jacksonville.gov/departments/property-appraiser",
+        "kind": "property"
+      }
+    ],
+    "fips": "12031"
+  },
+  "us-fl-hillsborough": {
+    "state": "FL",
+    "county": "Hillsborough",
+    "cities": [
+      "tampa",
+      "hillsborough",
+      "brandon, fl"
+    ],
+    "portals": [
+      {
+        "name": "Hillsborough County Property Appraiser",
+        "url": "https://www.hcpafl.org/",
+        "kind": "property"
+      }
+    ],
+    "fips": "12057"
+  },
+  "us-fl-miami-dade": {
+    "portals": [
+      {
+        "name": "Miami-Dade Property Appraiser",
+        "url": "https://www.miamidadepa.gov/pa/home.page",
+        "kind": "property"
+      },
+      {
+        "name": "11th Judicial Circuit (Miami-Dade)",
+        "url": "https://www.jud11.flcourts.org/",
+        "kind": "courts"
+      }
+    ],
+    "cities": [
+      "miami-dade",
+      "miami dade",
+      "miami,",
+      "miami fl",
+      "coral gables",
+      "hialeah"
+    ],
+    "state": "FL",
+    "county": "Miami-Dade",
+    "fips": "12086"
+  },
+  "us-fl-orange": {
+    "portals": [
+      {
+        "name": "Orange County FL Property Appraiser",
+        "url": "https://www.ocpafl.org/",
+        "kind": "property"
+      },
+      {
+        "name": "9th Judicial Circuit (Orange FL)",
+        "url": "https://ninthcircuit.org/",
+        "kind": "courts"
+      }
+    ],
+    "cities": [
+      "orange county, fl",
+      "orlando",
+      "winter park",
+      "apopka"
+    ],
+    "state": "FL",
+    "county": "Orange",
+    "fips": "12095"
+  },
+  "us-hi-honolulu": {
+    "state": "HI",
+    "county": "Honolulu",
+    "cities": [
+      "honolulu",
+      "oahu",
+      "pearl city",
+      "kailua, hi"
+    ],
+    "portals": [
+      {
+        "name": "City & County of Honolulu Real Property",
+        "url": "https://realproperty.honolulu.gov/",
+        "kind": "property"
+      }
+    ],
+    "fips": "15003"
+  },
+  "us-id-ada": {
+    "state": "ID",
+    "county": "Ada",
+    "cities": [
+      "boise",
+      "ada county",
+      "meridian, id",
+      "nampa"
+    ],
+    "portals": [
+      {
+        "name": "Ada County ID Assessor",
+        "url": "https://adacounty.id.gov/assessor/",
+        "kind": "property"
+      }
+    ],
+    "fips": "16001"
+  },
+  "us-il-cook": {
+    "portals": [
+      {
+        "name": "Cook County IL Assessor",
+        "url": "https://www.cookcountyassessoril.gov/",
+        "kind": "property"
+      },
+      {
+        "name": "Cook County IL Clerk",
+        "url": "https://www.cookcountyclerkil.gov/",
+        "kind": "vital"
+      },
+      {
+        "name": "Cook County Circuit Court",
+        "url": "https://www.cookcountycourtil.gov/",
+        "kind": "courts"
+      }
+    ],
+    "cities": [
+      "cook county",
+      "chicago",
+      "evanston",
+      "skokie",
+      "oak park"
+    ],
+    "state": "IL",
+    "county": "Cook",
+    "fips": "17031"
+  },
+  "us-in-marion": {
+    "state": "IN",
+    "county": "Marion",
+    "cities": [
+      "indianapolis",
+      "marion county, in"
+    ],
+    "portals": [
+      {
+        "name": "Marion County IN Assessor",
+        "url": "https://www.indy.gov/agency/marion-county-assessor",
+        "kind": "property"
+      }
+    ],
+    "fips": "18097"
+  },
+  "us-ks-johnson": {
+    "state": "KS",
+    "county": "Johnson",
+    "cities": [
+      "overland park",
+      "olathe",
+      "johnson county, ks",
+      "lenexa",
+      "shawnee, ks"
+    ],
+    "portals": [
+      {
+        "name": "Johnson County KS Appraiser",
+        "url": "https://www.jocogov.org/department/appraiser",
+        "kind": "property"
+      }
+    ],
+    "fips": "20091"
+  },
+  "us-ks-sedgwick": {
+    "state": "KS",
+    "county": "Sedgwick",
+    "cities": [
+      "wichita",
+      "sedgwick county"
+    ],
+    "portals": [
+      {
+        "name": "Sedgwick County Appraiser",
+        "url": "https://www.sedgwickcounty.org/appraiser/",
+        "kind": "property"
+      }
+    ],
+    "fips": "20173"
+  },
+  "us-ky-jefferson": {
+    "state": "KY",
+    "county": "Jefferson",
+    "cities": [
+      "louisville",
+      "jefferson county, ky"
+    ],
+    "portals": [
+      {
+        "name": "Jefferson County KY PVA",
+        "url": "https://jeffersonpva.ky.gov/",
+        "kind": "property"
+      }
+    ],
+    "fips": "21111"
+  },
+  "us-ma-suffolk": {
+    "portals": [
+      {
+        "name": "City of Boston Assessing",
+        "url": "https://www.boston.gov/departments/assessing",
+        "kind": "property"
+      }
+    ],
+    "cities": [
+      "suffolk county, ma",
+      "boston, ma",
+      "boston ma"
+    ],
+    "state": "MA",
+    "county": "Suffolk",
+    "fips": "25025"
+  },
+  "us-mn-hennepin": {
+    "state": "MN",
+    "county": "Hennepin",
+    "cities": [
+      "minneapolis",
+      "hennepin",
+      "bloomington, mn",
+      "eden prairie",
+      "plymouth, mn"
+    ],
+    "portals": [
+      {
+        "name": "Hennepin County property search (PINS)",
+        "url": "https://www16.co.hennepin.mn.us/pins/",
+        "kind": "property"
+      }
+    ],
+    "fips": "27053"
+  },
+  "us-mo-jackson": {
+    "state": "MO",
+    "county": "Jackson",
+    "cities": [
+      "kansas city",
+      "jackson county, mo",
+      "independence, mo"
+    ],
+    "portals": [
+      {
+        "name": "Jackson County MO Assessment",
+        "url": "https://www.jacksongov.org/Government/Departments/Assessment",
+        "kind": "property"
+      }
+    ],
+    "fips": "29095"
+  },
+  "us-mo-st-louis-city": {
+    "state": "MO",
+    "county": "St. Louis city",
+    "cities": [
+      "st. louis, mo",
+      "st louis, mo",
+      "saint louis, mo"
+    ],
+    "portals": [
+      {
+        "name": "City of St. Louis Assessor",
+        "url": "https://www.stlouis-mo.gov/government/departments/assessor/",
+        "kind": "property"
+      }
+    ],
+    "fips": "29510"
+  },
+  "us-nc-mecklenburg": {
+    "state": "NC",
+    "county": "Mecklenburg",
+    "cities": [
+      "charlotte",
+      "mecklenburg",
+      "concord, nc"
+    ],
+    "portals": [
+      {
+        "name": "Mecklenburg County property search",
+        "url": "https://property.spatialest.com/nc/mecklenburg/",
+        "kind": "property"
+      }
+    ],
+    "fips": "37119"
+  },
+  "us-nc-wake": {
+    "portals": [
+      {
+        "name": "Wake County Tax / Real Estate",
+        "url": "https://www.wake.gov/departments-government/tax-administration/real-estate",
+        "kind": "property"
+      }
+    ],
+    "cities": [
+      "wake county",
+      "raleigh",
+      "cary, nc",
+      "apex, nc"
+    ],
+    "state": "NC",
+    "county": "Wake",
+    "fips": "37183"
+  },
+  "us-nv-clark": {
+    "portals": [
+      {
+        "name": "Clark County NV Assessor",
+        "url": "https://www.clarkcountynv.gov/government/assessor/",
+        "kind": "property"
+      },
+      {
+        "name": "Clark County Courts",
+        "url": "https://www.clarkcountycourts.us/",
+        "kind": "courts"
+      }
+    ],
+    "cities": [
+      "clark county, nv",
+      "las vegas",
+      "henderson, nv",
+      "north las vegas"
+    ],
+    "state": "NV",
+    "county": "Clark",
+    "fips": "32003"
+  },
+  "us-ny-bronx": {
+    "state": "NY",
+    "county": "Bronx",
+    "cities": [
+      "bronx",
+      "the bronx"
+    ],
+    "portals": [
+      {
+        "name": "NYC Property Assessments",
+        "url": "https://www.nyc.gov/site/finance/taxes/property-assessments.page",
+        "kind": "property"
+      }
+    ],
+    "fips": "36005"
+  },
+  "us-ny-erie": {
+    "state": "NY",
+    "county": "Erie",
+    "cities": [
+      "buffalo",
+      "erie county, ny",
+      "amherst, ny",
+      "tonawanda"
+    ],
+    "portals": [
+      {
+        "name": "Erie County real property",
+        "url": "https://www3.erie.gov/ecrpts/",
+        "kind": "property"
+      }
+    ],
+    "fips": "36029"
+  },
+  "us-ny-kings": {
+    "state": "NY",
+    "county": "Kings",
+    "cities": [
+      "brooklyn",
+      "kings county"
+    ],
+    "portals": [
+      {
+        "name": "NYC Property Assessments",
+        "url": "https://www.nyc.gov/site/finance/taxes/property-assessments.page",
+        "kind": "property"
+      }
+    ],
+    "fips": "36047"
+  },
+  "us-ny-monroe": {
+    "state": "NY",
+    "county": "Monroe",
+    "cities": [
+      "rochester",
+      "monroe county, ny",
+      "greece, ny"
+    ],
+    "portals": [
+      {
+        "name": "Monroe County NY property",
+        "url": "https://www.monroecounty.gov/property",
+        "kind": "property"
+      }
+    ],
+    "fips": "36055"
+  },
+  "us-ny-nassau": {
+    "state": "NY",
+    "county": "Nassau",
+    "cities": [
+      "nassau county",
+      "hempstead",
+      "oceanside, ny",
+      "freeport, ny",
+      "long island"
+    ],
+    "portals": [
+      {
+        "name": "Nassau County Assessment",
+        "url": "https://www.nassaucountyny.gov/1501/Assessment",
+        "kind": "property"
+      }
+    ],
+    "fips": "36059"
+  },
+  "us-ny-new-york": {
+    "state": "NY",
+    "county": "New York",
+    "cities": [
+      "manhattan",
+      "new york, ny",
+      "nyc",
+      "new york city"
+    ],
+    "portals": [
+      {
+        "name": "NYC Property Assessments",
+        "url": "https://www.nyc.gov/site/finance/taxes/property-assessments.page",
+        "kind": "property"
+      }
+    ],
+    "fips": "36061"
+  },
+  "us-ny-queens": {
+    "state": "NY",
+    "county": "Queens",
+    "cities": [
+      "queens",
+      "flushing",
+      "jamaica, ny",
+      "astoria"
+    ],
+    "portals": [
+      {
+        "name": "NYC Property Assessments",
+        "url": "https://www.nyc.gov/site/finance/taxes/property-assessments.page",
+        "kind": "property"
+      }
+    ],
+    "fips": "36081"
+  },
+  "us-ny-richmond": {
+    "state": "NY",
+    "county": "Richmond",
+    "cities": [
+      "staten island",
+      "richmond county"
+    ],
+    "portals": [
+      {
+        "name": "NYC Property Assessments",
+        "url": "https://www.nyc.gov/site/finance/taxes/property-assessments.page",
+        "kind": "property"
+      }
+    ],
+    "fips": "36085"
+  },
+  "us-ny-suffolk": {
+    "state": "NY",
+    "county": "Suffolk",
+    "cities": [
+      "suffolk county, ny",
+      "brookhaven",
+      "islip",
+      "huntington, ny"
+    ],
+    "portals": [
+      {
+        "name": "Suffolk County Real Property",
+        "url": "https://www.suffolkcountyny.gov/Departments/Real-Property",
+        "kind": "property"
+      }
+    ],
+    "fips": "36103"
+  },
+  "us-oh-cuyahoga": {
+    "state": "OH",
+    "county": "Cuyahoga",
+    "cities": [
+      "cleveland",
+      "cuyahoga",
+      "parma, oh",
+      "lakewood, oh"
+    ],
+    "portals": [
+      {
+        "name": "Cuyahoga County Fiscal Officer",
+        "url": "https://www.cuyahogacounty.gov/fiscal-officer",
+        "kind": "property"
+      }
+    ],
+    "fips": "39035"
+  },
+  "us-oh-franklin": {
+    "state": "OH",
+    "county": "Franklin",
+    "cities": [
+      "columbus, oh",
+      "columbus oh",
+      "franklin county, oh",
+      "dublin, oh"
+    ],
+    "portals": [
+      {
+        "name": "Franklin County OH Auditor",
+        "url": "https://auditor.franklincountyohio.gov/Home",
+        "kind": "property"
+      }
+    ],
+    "fips": "39049"
+  },
+  "us-oh-hamilton": {
+    "state": "OH",
+    "county": "Hamilton",
+    "cities": [
+      "cincinnati",
+      "hamilton county, oh"
+    ],
+    "portals": [
+      {
+        "name": "Hamilton County OH Auditor",
+        "url": "https://www.hamiltoncountyauditor.org/",
+        "kind": "property"
+      }
+    ],
+    "fips": "39061"
+  },
+  "us-ok-oklahoma": {
+    "state": "OK",
+    "county": "Oklahoma",
+    "cities": [
+      "oklahoma city",
+      "okc",
+      "oklahoma county",
+      "edmond",
+      "moore, ok"
+    ],
+    "portals": [
+      {
+        "name": "Oklahoma County Assessor",
+        "url": "https://www.oklahomacounty.org/elected-offices/assessor",
+        "kind": "property"
+      }
+    ],
+    "fips": "40109"
+  },
+  "us-pa-allegheny": {
+    "portals": [
+      {
+        "name": "Allegheny County Property Assessments",
+        "url": "https://www.alleghenycounty.us/Services/Property-Assessments-and-Real-Estate",
+        "kind": "property"
+      },
+      {
+        "name": "Allegheny County Courts",
+        "url": "https://www.alleghenycourts.us/",
+        "kind": "courts"
+      }
+    ],
+    "cities": [
+      "allegheny",
+      "pittsburgh"
+    ],
+    "state": "PA",
+    "county": "Allegheny",
+    "fips": "42003"
+  },
+  "us-pa-berks": {
+    "state": "PA",
+    "county": "Berks",
+    "cities": [
+      "reading, pa",
+      "berks county"
+    ],
+    "portals": [
+      {
+        "name": "Berks County Assessment",
+        "url": "https://www.berkspa.gov/departments/assessment",
+        "kind": "property"
+      }
+    ],
+    "fips": "42011"
+  },
+  "us-pa-philadelphia": {
+    "portals": [
+      {
+        "name": "Philadelphia Property Assessment",
+        "url": "https://property.phila.gov/",
+        "kind": "property"
+      },
+      {
+        "name": "Philadelphia Courts",
+        "url": "https://www.courts.phila.gov/",
+        "kind": "courts"
+      }
+    ],
+    "cities": [
+      "philadelphia",
+      "philly"
+    ],
+    "state": "PA",
+    "county": "Philadelphia",
+    "fips": "42101"
+  },
+  "us-ri-providence": {
+    "state": "RI",
+    "county": "Providence",
+    "cities": [
+      "providence",
+      "cranston",
+      "warwick, ri",
+      "pawtucket"
+    ],
+    "portals": [
+      {
+        "name": "Providence Tax Assessor",
+        "url": "https://www.providenceri.gov/tax-assessor/",
+        "kind": "property"
+      }
+    ],
+    "fips": "44007"
+  },
+  "us-tn-davidson": {
+    "state": "TN",
+    "county": "Davidson",
+    "cities": [
+      "nashville",
+      "davidson county",
+      "nashville, tn"
+    ],
+    "portals": [
+      {
+        "name": "Davidson County Property Assessor",
+        "url": "https://www.padctn.org/",
+        "kind": "property"
+      }
+    ],
+    "fips": "47037"
+  },
+  "us-tx-bexar": {
+    "portals": [
+      {
+        "name": "Bexar Appraisal District",
+        "url": "https://bcad.org/",
+        "kind": "property"
+      },
+      {
+        "name": "Bexar County",
+        "url": "https://www.bexar.org/",
+        "kind": "government"
+      }
+    ],
+    "cities": [
+      "bexar",
+      "san antonio"
+    ],
+    "state": "TX",
+    "county": "Bexar",
+    "fips": "48029"
+  },
+  "us-tx-collin": {
+    "state": "TX",
+    "county": "Collin",
+    "cities": [
+      "plano",
+      "mckinney",
+      "frisco",
+      "allen, tx",
+      "collin county"
+    ],
+    "portals": [
+      {
+        "name": "Collin CAD",
+        "url": "https://collincad.org/",
+        "kind": "property"
+      }
+    ],
+    "fips": "48085"
+  },
+  "us-tx-dallas": {
+    "portals": [
+      {
+        "name": "Dallas Central Appraisal District",
+        "url": "https://www.dallascad.org/",
+        "kind": "property"
+      },
+      {
+        "name": "Dallas County Courts",
+        "url": "https://www.dallascounty.org/government/courts/",
+        "kind": "courts"
+      }
+    ],
+    "cities": [
+      "dallas, tx",
+      "dallas tx",
+      "dallas county"
+    ],
+    "state": "TX",
+    "county": "Dallas",
+    "fips": "48113"
+  },
+  "us-tx-denton": {
+    "state": "TX",
+    "county": "Denton",
+    "cities": [
+      "denton",
+      "lewisville",
+      "flower mound",
+      "denton county"
+    ],
+    "portals": [
+      {
+        "name": "Denton CAD",
+        "url": "https://www.dentoncad.com/",
+        "kind": "property"
+      }
+    ],
+    "fips": "48121"
+  },
+  "us-tx-el-paso": {
+    "state": "TX",
+    "county": "El Paso",
+    "cities": [
+      "el paso",
+      "el paso, tx",
+      "socorro, tx"
+    ],
+    "portals": [
+      {
+        "name": "El Paso Central Appraisal District",
+        "url": "https://epcad.org/",
+        "kind": "property"
+      }
+    ],
+    "fips": "48141"
+  },
+  "us-tx-harris": {
+    "portals": [
+      {
+        "name": "Harris County Appraisal District (HCAD)",
+        "url": "https://hcad.org/",
+        "kind": "property"
+      },
+      {
+        "name": "Harris County Clerk",
+        "url": "https://www.cclerk.hctx.net/",
+        "kind": "vital"
+      },
+      {
+        "name": "Harris County District Courts",
+        "url": "https://www.justex.net/",
+        "kind": "courts"
+      }
+    ],
+    "cities": [
+      "harris county",
+      "houston",
+      "pasadena tx",
+      "baytown",
+      "sugar land"
+    ],
+    "state": "TX",
+    "county": "Harris",
+    "fips": "48201"
+  },
+  "us-tx-hidalgo": {
+    "state": "TX",
+    "county": "Hidalgo",
+    "cities": [
+      "mcallen",
+      "edinburg",
+      "mission, tx",
+      "hidalgo"
+    ],
+    "portals": [
+      {
+        "name": "Hidalgo Appraisal District",
+        "url": "https://www.hidalgoad.org/",
+        "kind": "property"
+      }
+    ],
+    "fips": "48215"
+  },
+  "us-tx-tarrant": {
+    "portals": [
+      {
+        "name": "Tarrant Appraisal District",
+        "url": "https://www.tad.org/",
+        "kind": "property"
+      },
+      {
+        "name": "Tarrant County Courts",
+        "url": "https://www.tarrantcountytx.gov/en/courts.html",
+        "kind": "courts"
+      }
+    ],
+    "cities": [
+      "tarrant",
+      "fort worth",
+      "arlington, tx"
+    ],
+    "state": "TX",
+    "county": "Tarrant",
+    "fips": "48439"
+  },
+  "us-tx-travis": {
+    "portals": [
+      {
+        "name": "Travis Central Appraisal District",
+        "url": "https://traviscad.org/",
+        "kind": "property"
+      },
+      {
+        "name": "Travis County Courts",
+        "url": "https://www.traviscountytx.gov/courts",
+        "kind": "courts"
+      }
+    ],
+    "cities": [
+      "travis county",
+      "austin, tx",
+      "austin tx",
+      "round rock",
+      "pflugerville"
+    ],
+    "state": "TX",
+    "county": "Travis",
+    "fips": "48453"
+  },
+  "us-ut-salt-lake": {
+    "state": "UT",
+    "county": "Salt Lake",
+    "cities": [
+      "salt lake city",
+      "salt lake county",
+      "west valley city",
+      "sandy, ut"
+    ],
+    "portals": [
+      {
+        "name": "Salt Lake County Assessor",
+        "url": "https://www.saltlakecounty.gov/assessor/",
+        "kind": "property"
+      }
+    ],
+    "fips": "49035"
+  },
+  "us-ut-utah": {
+    "state": "UT",
+    "county": "Utah",
+    "cities": [
+      "provo",
+      "orem",
+      "utah county, ut",
+      "lehi"
+    ],
+    "portals": [
+      {
+        "name": "Utah County Assessor",
+        "url": "https://assessor.utahcounty.gov/",
+        "kind": "property"
+      }
+    ],
+    "fips": "49049"
+  },
+  "us-va-fairfax": {
+    "state": "VA",
+    "county": "Fairfax",
+    "cities": [
+      "fairfax",
+      "reston",
+      "herndon",
+      "mclean",
+      "vienna, va",
+      "alexandria"
+    ],
+    "portals": [
+      {
+        "name": "Fairfax County Real Estate Taxes",
+        "url": "https://www.fairfaxcounty.gov/taxes/real-estate",
+        "kind": "property"
+      }
+    ],
+    "fips": "51059"
+  },
+  "us-vt-chittenden": {
+    "state": "VT",
+    "county": "Chittenden",
+    "cities": [
+      "burlington",
+      "chittenden",
+      "south burlington",
+      "essex, vt"
+    ],
+    "portals": [
+      {
+        "name": "City of Burlington Assessor",
+        "url": "https://www.burlingtonvt.gov/assessor",
+        "kind": "property"
+      }
+    ],
+    "fips": "50007"
+  },
+  "us-wa-king": {
+    "portals": [
+      {
+        "name": "King County WA Assessor",
+        "url": "https://kingcounty.gov/en/dept/assessor",
+        "kind": "property"
+      },
+      {
+        "name": "King County eReal Property",
+        "url": "https://blue.kingcounty.com/Assessor/eRealProperty/default.aspx",
+        "kind": "property"
+      },
+      {
+        "name": "King County District Court Admin",
+        "url": "https://kingcounty.gov/en/dept/dja",
+        "kind": "courts"
+      }
+    ],
+    "cities": [
+      "king county",
+      "seattle",
+      "bellevue",
+      "redmond",
+      "kent, wa",
+      "renton"
+    ],
+    "state": "WA",
+    "county": "King",
+    "fips": "53033"
+  },
+  "us-wi-milwaukee": {
+    "state": "WI",
+    "county": "Milwaukee",
+    "cities": [
+      "milwaukee",
+      "milwaukee county"
+    ],
+    "portals": [
+      {
+        "name": "City of Milwaukee Assessments",
+        "url": "https://assessments.milwaukee.gov/",
+        "kind": "property"
+      }
+    ],
+    "fips": "55079"
+  }
+}

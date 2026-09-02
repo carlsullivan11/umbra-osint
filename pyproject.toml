@@ -1,0 +1,103 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "umbra-osint"
+version = "0.2.1"
+description = "Graph-first local OSINT platform for authorized investigations"
+# Not README.md: that one is written for someone standing in the repo, with a
+# 28-row index of relative `docs/` links that resolve to nothing on PyPI, plus
+# deploy and vault detail a `pip install` audience has no use for. Two readers,
+# two documents.
+readme = "README-pypi.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Carl Sullivan" }]
+keywords = ["osint", "security", "threat-intelligence", "dfir", "cti", "reconnaissance"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: Information Technology",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Security",
+  "Topic :: Internet :: Name Service (DNS)",
+]
+
+# Distribution name is "umbra-osint" (Carl's call, 2026-08-15): plain "umbra"
+# is already taken on PyPI. Only the *distribution* name changed — the import
+# package stays `umbra` and the console scripts stay `umbra` / `umbra-worker`,
+# so nothing changes for anyone already using it except `pip install`.
+# NOT PUBLISHED — publishing needs Carl's explicit go. See docs/OSS.md.
+
+
+dependencies = [
+  "typer>=0.12",
+  "rich>=13.7",
+  "sqlalchemy>=2.0",
+  "pydantic>=2.6",
+  "pydantic-settings>=2.2",
+  "httpx>=0.27",
+  "dnspython>=2.6",
+  "networkx>=3.2",
+  "python-dateutil>=2.9",
+  "psycopg[binary]>=3.1",
+  "cryptography>=42",
+  "phonenumbers>=8.13",
+]
+
+[project.optional-dependencies]
+# The hosted web app is not distributed (see the packages.find exclude below),
+# so its stack is not a dependency of the CLI either — an ASGI server, a
+# template engine and a markdown renderer in every `pip install` of a
+# command-line tool is weight nobody asked for. Anyone running the UI from a
+# checkout installs this extra.
+web = [
+  "fastapi>=0.110",
+  "uvicorn[standard]>=0.27",
+  "jinja2>=3.1",
+  "markdown-it-py>=3.0",
+  "python-multipart>=0.0.9",
+]
+dev = [
+  "pytest>=8.0", "pytest-asyncio>=0.23", "respx>=0.21",
+  "umbra-osint[web]",
+]
+
+[project.scripts]
+umbra-worker = "umbra.worker.main:main"
+umbra = "umbra.cli.main:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+# The hosted web app stays private (docs/OPEN-CORE.md: public source is the CLI
+# package, the Obsidian plugin and umbra-wiki). The GitHub repo is private, so
+# the PyPI artifact is the only public one — this exclusion is where that line
+# is actually held. It affects the *distribution* only: the web app is still in
+# this tree, still tested, still what production deploys.
+exclude = ["umbra.web*"]
+
+[tool.setuptools.package-data]
+# The curated mixer/bridge registry is data the published CLI needs:
+# `umbra crypto screen` without it silently reports no services, and a miss
+# there reads as "not a mixer". The web assets that used to live here went with
+# the umbra.web exclusion above.
+umbra = ["crypto/data/*.json", "data/geo/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[project.urls]
+# Project URLs cannot be edited after a release, so these only ever point at
+# things that exist. The repo went public at 0.2.2; earlier releases carried
+# no Source link rather than a 404.
+Homepage = "https://umbra-osint.com"
+Source = "https://github.com/carlsullivan11/umbra-osint"
+Issues = "https://github.com/carlsullivan11/umbra-osint/issues"
+Documentation = "https://umbra-osint.com/guide"
+"Lawful use policy" = "https://umbra-osint.com/legal/aup"
+"Cyber wiki" = "https://umbra-osint.com/wiki"

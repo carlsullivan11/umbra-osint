@@ -1,0 +1,83 @@
+{
+  "_readme": [
+    "Curated registry of on-chain services whose involvement is a risk SIGNAL.",
+    "",
+    "Interaction with a mixer is not a crime and not evidence of one. People use",
+    "privacy tools for private reasons. Umbra records the touch and its",
+    "provenance; a human decides what it means.",
+    "",
+    "Every entry must carry `verification`. An address labelled 'mixer' that is",
+    "not one is a false accusation against whoever controls it, so nothing goes",
+    "in here on recollection alone. `code_sha256` is the keccak-free sha256 of",
+    "the deployed bytecode, read from a public node — three of the pools below",
+    "share byte-identical code, which is what a single contract deployed at",
+    "several denominations looks like.",
+    "",
+    "sanctions_status is deliberately NOT a field. OFAC listings change (Tornado",
+    "Cash: designated 2022-08-08, removed 2025) and the live SDN lake is the only",
+    "thing allowed to answer that question."
+  ],
+  "version": 1,
+  "services": [
+    {
+      "name": "Tornado Cash (ETH pool, 0.1 ETH)",
+      "kind": "mixer",
+      "chain": "eth",
+      "addresses": ["0x12d66f87a04a9e220743712ce6d9bb1b5616b8fc"],
+      "tags": ["mixer", "ethereum", "fixed_denomination"],
+      "url": "https://home.treasury.gov/news/press-releases/jy0916",
+      "notes": "Non-custodial fixed-denomination pool. Interaction is a signal, not guilt.",
+      "verification": {
+        "method": "eth_getCode on a public Ethereum node",
+        "checked_at": "2026-08-19",
+        "code_sha256": "3bbc2652c41f0a13",
+        "code_bytes": 6615
+      }
+    },
+    {
+      "name": "Tornado Cash (ETH pool, 1 ETH)",
+      "kind": "mixer",
+      "chain": "eth",
+      "addresses": ["0x47ce0c6ed5b0ce3d3a51fdb1c52dc66a7c3c2936"],
+      "tags": ["mixer", "ethereum", "fixed_denomination"],
+      "url": "https://home.treasury.gov/news/press-releases/jy0916",
+      "notes": "Byte-identical code to the 10 and 100 ETH pools.",
+      "verification": {
+        "method": "eth_getCode on a public Ethereum node",
+        "checked_at": "2026-08-19",
+        "code_sha256": "57632dbb86b78ae0",
+        "code_bytes": 5191
+      }
+    },
+    {
+      "name": "Tornado Cash (ETH pool, 10 ETH)",
+      "kind": "mixer",
+      "chain": "eth",
+      "addresses": ["0x910cbd523d972eb0a6f4cae4618ad62622b39dbf"],
+      "tags": ["mixer", "ethereum", "fixed_denomination"],
+      "url": "https://home.treasury.gov/news/press-releases/jy0916",
+      "notes": "Byte-identical code to the 1 and 100 ETH pools.",
+      "verification": {
+        "method": "eth_getCode on a public Ethereum node",
+        "checked_at": "2026-08-19",
+        "code_sha256": "57632dbb86b78ae0",
+        "code_bytes": 5191
+      }
+    },
+    {
+      "name": "Tornado Cash (ETH pool, 100 ETH)",
+      "kind": "mixer",
+      "chain": "eth",
+      "addresses": ["0xa160cdab225685da1d56aa342ad8841c3b53f291"],
+      "tags": ["mixer", "ethereum", "fixed_denomination"],
+      "url": "https://home.treasury.gov/news/press-releases/jy0916",
+      "notes": "Byte-identical code to the 1 and 10 ETH pools.",
+      "verification": {
+        "method": "eth_getCode on a public Ethereum node",
+        "checked_at": "2026-08-19",
+        "code_sha256": "57632dbb86b78ae0",
+        "code_bytes": 5191
+      }
+    }
+  ]
+}
