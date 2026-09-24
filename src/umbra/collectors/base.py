@@ -81,6 +81,7 @@ def default_registry() -> CollectorRegistry:
     from umbra.collectors.dns_email_auth import DnsEmailAuthCollector
     from umbra.collectors.dns_resolve import DnsResolveCollector
     from umbra.collectors.edgar_search import EdgarSearchCollector
+    from umbra.collectors.email_profile import EmailProfileCollector
     from umbra.collectors.email_split import EmailSplitCollector
     from umbra.collectors.github_commits import GithubCommitsCollector
     from umbra.collectors.github_user import GithubUserCollector
@@ -94,6 +95,8 @@ def default_registry() -> CollectorRegistry:
     from umbra.collectors.county_records import CountyRecordsCollector
     from umbra.collectors.wifi_maps import WifiMapsCollector
     from umbra.collectors.sex_offender_registry import SexOffenderRegistryCollector
+    from umbra.collectors.animal_registry import AnimalRegistryCollector
+    from umbra.collectors.inmate_locator import InmateLocatorCollector
     from umbra.collectors.rdap_domain import RdapDomainCollector
     from umbra.collectors.rdap_ip import RdapIpCollector
     from umbra.collectors.ip_geo import IpGeoCollector
@@ -110,12 +113,16 @@ def default_registry() -> CollectorRegistry:
     from umbra.collectors.darkweb import RansomwareExposureCollector
     from umbra.collectors.ct_lake import CtLakeCollector
     from umbra.collectors.mac_oui import MacOuiCollector
+    from umbra.collectors.people_lake import PeopleLakeCollector
     from umbra.collectors.phone_validate import PhoneValidateCollector
     from umbra.collectors.crypto_screen import CryptoScreenCollector
     from umbra.collectors.cve_lookup import CveLookupCollector
     from umbra.collectors.wikidata import WikidataCollector
     from umbra.collectors.malware_infra import MalwareInfraCollector
     from umbra.collectors.sslbl_cert import SslblCertCollector
+    from umbra.collectors.faa_registry import FaaRegistryCollector
+    from umbra.collectors.urlscan_io import UrlscanIoCollector
+    from umbra.collectors.internetdb import InternetDbCollector
 
     reg = CollectorRegistry()
     for c in (
@@ -133,6 +140,8 @@ def default_registry() -> CollectorRegistry:
         SecurityTxtCollector(),
         LookalikeDomainCollector(),
         EmailSplitCollector(),
+        EmailProfileCollector(),
+        PeopleLakeCollector(),
         GravatarCollector(),
         GithubUserCollector(),
         GithubCommitsCollector(),
@@ -144,6 +153,8 @@ def default_registry() -> CollectorRegistry:
         CountyRecordsCollector(),
         WifiMapsCollector(),
         SexOffenderRegistryCollector(),
+        AnimalRegistryCollector(),
+        InmateLocatorCollector(),
         HibpBreachCollector(),
         EdgarSearchCollector(),
         OpenCorporatesCollector(),
@@ -159,6 +170,9 @@ def default_registry() -> CollectorRegistry:
         MalwareInfraCollector(),
         SslblCertCollector(),
         CourtRecordsCollector(),
+        FaaRegistryCollector(),
+        UrlscanIoCollector(),
+        InternetDbCollector(),
     ):
         reg.register(c)
     return reg

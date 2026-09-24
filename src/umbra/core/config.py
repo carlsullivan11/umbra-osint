@@ -97,6 +97,37 @@ class Settings(BaseSettings):
     llm_temperature: float = 0.1
     llm_max_tokens: int = 2000
 
+    # Jev (TypeSafe AI) second-opinion verdicts — docs/JEV.md. Off by default;
+    # with it off or no key, verdicts are exactly the deterministic ones.
+    # Routed through OpenRouter for now (one key, OpenRouter billing); set
+    # UMBRA_JEV_PROVIDER=typesafe + UMBRA_TYPESAFE_API_KEY to go direct.
+    jev_enabled: bool = False
+    jev_provider: Literal["openrouter", "typesafe"] = "openrouter"
+    openrouter_api_key: str | None = None
+    typesafe_api_key: str | None = None
+    # Overrides the provider's default base (…/v1/systemone is appended).
+    jev_base_url: str | None = None
+    # Pinned, not "latest": answers record the model they came from, and a
+    # version bump reruns the J0 eval first.
+    jev_model: str = "jev-1.13"
+    jev_timeout_s: float = 3.0
+    jev_min_confidence: float = 0.70
+    # Input tokens per UTC day; 0 = unlimited. Bounds abuse, not cost.
+    jev_daily_token_budget: int = 2_000_000
+
+    @property
+    def jev_api_key(self) -> str | None:
+        return self.openrouter_api_key if self.jev_provider == "openrouter" else self.typesafe_api_key
+
+    @property
+    def jev_endpoint_base(self) -> str:
+        from umbra.jev.client import PROVIDER_BASE_URLS
+        return self.jev_base_url or PROVIDER_BASE_URLS[self.jev_provider]
+
+    @property
+    def jev_configured(self) -> bool:
+        return bool(self.jev_enabled and self.jev_api_key)
+
     @property
     def db_path(self) -> Path:
         return self.data_dir / self.db_filename

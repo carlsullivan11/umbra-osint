@@ -39,6 +39,13 @@ COLLECTOR_TRUST: dict[str, float] = {
     "html_links": 0.65,
     "security_txt": 0.85,
     "email_split": 0.95,
+    # Offline and derived from the address itself — nothing is inferred
+    # from a third party, so this is as trustworthy as the string is.
+    "email_profile": 0.95,
+    # An owned corpus read offline. The rows are public filings; what is
+    # uncertain is whether they are the same person, and the evidence says
+    # so in words rather than by lowering the number.
+    "people_lake": 0.85,
     "gravatar": 0.7,
     "github_user": 0.85,
     "github_commits": 0.8,
@@ -53,6 +60,10 @@ COLLECTOR_TRUST: dict[str, float] = {
     "court_records": 0.35,
     "wifi_maps": 0.4,  # crowdsourced last-seen / OSM cameras; not a residence
     "sex_offender_registry": 0.55,  # public registry; first+last on page ≠ identity
+    # Every row is a cited finding (conviction, plea, registry listing), but a
+    # name on one is still not an identity — same footing as the SOR portals.
+    "animal_registry": 0.55,
+    "inmate_locator": 0.5,  # federal BOP register; first+last on a record ≠ identity
     # Obituary URLs + survivor name parse — useful graph, weak identity until confirm
     "obituary_search": 0.45,
     "hibp_breach": 0.95,
@@ -64,6 +75,21 @@ COLLECTOR_TRUST: dict[str, float] = {
     "ransomware_exposure": 0.9,  # exact match against a validated public leak-site index
     "ct_lake": 0.9,  # locally-ingested, cryptographically-anchored CT data (owned corpus)
     "mac_oui": 0.9,  # the IEEE registry itself, read from the owned OUI lake
+    # The FAA file is authoritative for *registration*, and registration is
+    # not operation — high trust in the record, not in what it implies about
+    # who was flying. Below mac_oui because the OUI answers the question it
+    # is asked, and this one answers a narrower question than people expect.
+    "faa_registry": 0.85,
+    # A real browser fetched the page and someone published the result, which
+    # is strong evidence that the page existed and behaved that way *at that
+    # moment*. It is not evidence about now, and most public scans carry no
+    # verdict at all — hence 0.7 rather than the 0.85 the FAA file gets.
+    "urlscan_io": 0.7,
+    # Shodan's observation, not Umbra's, and dated from whenever Shodan last
+    # looked. The ports it reports were real when seen; whether they are open
+    # now is a different claim, and the CVE list is inferred from version
+    # banners rather than confirmed — hence below urlscan_io.
+    "internetdb": 0.65,
     # Offline numbering-plan only — high trust for format/region, not identity.
     "phone_validate": 0.9,
     # OFAC/curated lake exact address match — high trust that the *list* says

@@ -65,6 +65,7 @@ These exist to reduce **illegal misuse** and preserve evidence of lawful purpose
 | MAC lookup never resolves a locally administered address | A randomized/private Wi-Fi address has no registrant; naming a "vendor" for one invents a fact, and treating it as a durable device ID is the first step toward device tracking of a person |
 | Server stack fingerprint recorded only from a fetch the operator already authorized | Fingerprinting **a server you asked about** is not fingerprinting **the people who visit you**: `fp_*` props come from the one handshake and GET a lookup already makes, and Umbra never fingerprints its own visitors or connects back to an IP that scanned it |
 | News feed polls public official/reputable sources only | No credentialed or paywalled scraping; feed items are labelled **signals, not findings** so a headline is never mistaken for a verified fact about someone |
+| **Person-name search requires a declared basis** (N1, 2026-09-14) | A name asks about a person; a domain asks about infrastructure. `/people`, `/records` and their `/v1` siblings now require an authorization basis, shown **above** the FCRA and identity-match caveats rather than under the results, and write one `person_search.declared` audit row. Umbra does not verify the declaration — the value is the deliberate act, the record that the caveats were seen, and the ability to answer later how the tool was used. **Only the query's shape is stored** (tokens, length, whether a state filter was set), never the name: a log of who looked up whom would be a worse privacy object than the search it audits. It never sets `Case.authorization_basis`, which stays an authority claim the web cannot make |
 
 Feature design priority: **do not ship capabilities whose primary purpose is the commission of crime.** Dual-use OSINT tools are normal; intentional crimeware is not.
 
@@ -73,6 +74,7 @@ Feature design priority: **do not ship capabilities whose primary purpose is the
 | Module | In scope | Explicitly out |
 |--------|----------|----------------|
 | MAC / OUI (`docs/COLLECTORS.md`, `umbra mac`) | Asset attribution: "what is this NIC on my network?" — offline registry lookup, layer-2 facts | Device stalking, presence tracking, or any claim to geolocate a MAC. Every result states that a MAC is not routable and not geolocatable from the address |
+| Animal-abuse registry (`docs/ANIMAL-REGISTRY.md`, `umbra animal-registry`) | Official, cited findings — convictions, pleas, government registry listings, civil orders — with delisting, retention and a dispute path | Charges or accusations as entries; publishing an unlinked report; street addresses, DOBs or photos; republishing a registry whose access terms forbid it. An open dispute hides the entry until a reviewer resolves it |
 | Cyber news feed (`docs/FEED.md`) | Defensive situational awareness from official advisories | Person-centric or social-stalking queries; scraping behind logins; copying article bodies (links only) |
 
 ---

@@ -32,13 +32,71 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.x509.oid import ExtensionOID, NameOID
 
 # Curated CT logs (temporal — CT logs are sharded by year and retire; refresh
-# yearly). All verified reachable. `umbra ct logs` shows live tree sizes.
+# yearly). All verified reachable against /ct/v1/get-sth on 2026-09-13.
+#
+# "Refresh yearly" was written here from the start and nothing enforced it. The
+# 2025 shards sat in this dict through 2026, the corpus froze at 2,000 certs,
+# and `ct stats` reported "100.0000% of log" — which reads as finished and meant
+# dead. `tests/test_ct_log_freshness.py` now fails when this list goes stale, so
+# the next January is a red test rather than a silent nine-month gap.
 KNOWN_LOGS: dict[str, str] = {
+    "cloudflare_nimbus2026": "https://ct.cloudflare.com/logs/nimbus2026",
+    "google_argon2026h1": "https://ct.googleapis.com/logs/us1/argon2026h1",
+    "google_argon2026h2": "https://ct.googleapis.com/logs/us1/argon2026h2",
+    "google_xenon2026h1": "https://ct.googleapis.com/logs/eu1/xenon2026h1",
+    "google_xenon2026h2": "https://ct.googleapis.com/logs/eu1/xenon2026h2",
+}
+
+# Shards that have closed to new submissions. Kept rather than deleted: ingest
+# checkpoints outlive the config, and a checkpoint whose log is simply *absent*
+# renders as "unknown" — which says less about a stalled corpus than "retired"
+# does. Certificates already ingested from these stay valid and searchable.
+RETIRED_LOGS: dict[str, str] = {
     "cloudflare_nimbus2025": "https://ct.cloudflare.com/logs/nimbus2025",
+    "google_argon2025h1": "https://ct.googleapis.com/logs/us1/argon2025h1",
     "google_argon2025h2": "https://ct.googleapis.com/logs/us1/argon2025h2",
     "google_xenon2025h2": "https://ct.googleapis.com/logs/eu1/xenon2025h2",
-    "google_argon2025h1": "https://ct.googleapis.com/logs/us1/argon2025h1",
 }
+
+
+def default_log() -> str:
+    """The log to ingest when nobody names one.
+
+    A literal default is how this rotted: `cloudflare_nimbus2025` was written
+    into the CLI and into `deploy/scripts/ct_ingest.sh`, and the ingest timer
+    spent nine months faithfully tailing a shard that had stopped accepting
+    certificates. Deriving it from `KNOWN_LOGS` means refreshing the shard list
+    is the only edit a new year needs.
+    """
+    return next(iter(KNOWN_LOGS))
+
+
+def log_status(name: str) -> str:
+    """``active`` | ``retired`` | ``unknown`` for a log name."""
+    if name in KNOWN_LOGS:
+        return "active"
+    if name in RETIRED_LOGS:
+        return "retired"
+    return "unknown"
+
+
+def describe_checkpoint(name: str, last_index: int, tree_size: int) -> str:
+    """One human line for an ingest checkpoint.
+
+    A percentage is only meaningful for a log that can still grow. On a retired
+    shard "100.0000% of log" is true and useless — it describes a finished read
+    of a source that will never have anything new, and it is indistinguishable
+    from a healthy, caught-up ingest. Say which one it is.
+    """
+    status = log_status(name)
+    if status == "retired":
+        return (f"at {last_index:,} / {tree_size:,} — retired shard, "
+                f"no new certificates (kept for search)")
+    pct = (last_index / tree_size * 100) if tree_size else 0.0
+    line = f"at {last_index:,} / {tree_size:,} ({pct:.4f}% of log)"
+    if status == "unknown":
+        line += " — log not in the configured set"
+    return line
 
 
 @dataclass

@@ -34,11 +34,11 @@ umbra profile <case-id>             # markdown profile with provenance
 umbra graph <case-id> -o acme.graphml
 ```
 
-- **40 plugin collectors**, most of them key-free — DNS, TLS, RDAP, HTTP,
+- **43 plugin collectors**, most of them key-free — DNS, TLS, RDAP, HTTP,
   Certificate Transparency, git forges, SPARQL, HTML.
-- **Entity graph** across 21 types: domain, ip, email, url, username, org,
+- **Entity graph** across 22 types: domain, ip, email, url, username, org,
   person, phone, crypto_address, location, vulnerability, malware, cert, asn,
-  mac, repo, technology, breach, paste, nameserver, registrar.
+  mac, aircraft, repo, technology, breach, paste, nameserver, registrar.
 - **Confidence scoring** — multi-factor bands, recomputed after every run, with
   every claim traceable to the evidence that produced it. Independent providers
   combine by noisy-OR, so three sources agreeing outranks one; feeds from the

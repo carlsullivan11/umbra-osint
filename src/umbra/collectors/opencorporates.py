@@ -45,19 +45,17 @@ class OpenCorporatesCollector(BaseCollector):
             or "hcaptcha" in html.lower()
             or "HAProxy Challenge" in html
         ):
+            # A note, not evidence. This used to write an evidence row saying
+            # "captcha wall — not scraped" at confidence 0.3, and on production
+            # that was *every* row the collector ever produced: 31 of 31, in
+            # every person and org result, sitting beside real findings and
+            # saying nothing. A source that refused to answer has not found
+            # anything, and the run-notes UI is where a source failure belongs.
             result.notes.append(
-                "OpenCorporates captcha/block — use `wikidata` as free substitute"
-            )
-            result.evidence.append(
-                EvidenceIn(
-                    collector=self.name,
-                    source_name="OpenCorporates HTML",
-                    source_url=url,
-                    summary="OpenCorporates captcha wall or block — not scraped",
-                    confidence=0.3,
-                    raw={"captcha": True, "status": resp.status_code},
-                    entity_key=src,
-                )
+                f"opencorporates: captcha wall or block (HTTP {resp.status_code}) "
+                "— unchecked, not an absence of companies by that name. "
+                "OpenCorporates serves a challenge to datacenter IPs; "
+                "`wikidata` is the free substitute."
             )
             return result
 

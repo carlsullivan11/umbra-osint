@@ -32,6 +32,8 @@ from umbra.cli.reputation_seed import seed_reputation
 from umbra.cli.ui_cmd import ui_command
 from umbra.cli.wiki_cmd import lookup_command, wiki_app
 from umbra.cli.mac_cmd import mac_app
+from umbra.cli.jev_cmd import jev_app
+from umbra.cli.triage_cmd import triage
 from umbra.cli.epss_cmd import epss_app
 from umbra.cli.psl_cmd import psl_app
 from umbra.cli.records_cmd import records_app
@@ -42,8 +44,13 @@ from umbra.cli.geoip_cmd import geoip_app
 from umbra.cli.people_cmd import people_app
 from umbra.cli.rf_cmd import rf_app
 from umbra.cli.feed_cmd import feed_app
-from umbra.cli.file_cmd import email_command, file_command
+from umbra.cli.file_cmd import analyze_command, email_command, file_command, search_command
 from umbra.cli.ops_cmd import ops_app
+from umbra.cli.analytics_cmd import app as analytics_app
+from umbra.cli.faa_cmd import faa_app
+from umbra.cli.animal_registry_cmd import animal_registry_app
+from umbra.cli.internetdb_cmd import internetdb_app
+from umbra.cli.urlscan_cmd import urlscan_app
 from umbra.cli.sentinel_cmd import sentinel_app
 
 
@@ -127,15 +134,24 @@ app.add_typer(rf_app, name="rf")
 app.add_typer(feed_app, name="feed")
 app.add_typer(ops_app, name="ops")
 app.add_typer(sentinel_app, name="sentinel")
+app.add_typer(analytics_app, name="analytics")
+app.add_typer(faa_app, name="faa")
+app.add_typer(animal_registry_app, name="animal-registry")
+app.add_typer(urlscan_app, name="urlscan")
+app.add_typer(internetdb_app, name="internetdb")
+app.add_typer(jev_app, name="jev")
 app.command("init")(init_command)
 app.command("doctor")(doctor_command)
 app.command("intent")(intent_command)
 app.command("email")(email_command)
 app.command("file")(file_command)
+app.command("search")(search_command)
+app.command("analyze")(analyze_command)
 app.command("lookup")(lookup_command)
 app.command("ui")(ui_command)
 app.command("exposure-monitor")(exposure_monitor)
 app.command("reputation-seed")(seed_reputation)
+app.command("triage")(triage)
 app.command("run")(run_case)
 app.command("score")(score_cmd)
 app.command("profile")(profile_cmd)

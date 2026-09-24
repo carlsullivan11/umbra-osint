@@ -1,7 +1,7 @@
 """Collectors that exist, are registered, and never run on the path people use.
 
-The registry, the playbook and COLLECTOR_TRUST all agree there are 40
-collectors. That count says nothing about whether a given collector is ever
+The registry, the playbook and COLLECTOR_TRUST all agree on the collector
+count. That count says nothing about whether a given collector is ever
 *reached*. Three were not, on a default domain plan:
 
     sslbl_cert           the abuse.ch SSL Blacklist lake, joined on the SHA-1
@@ -20,6 +20,8 @@ them. Adding the name to the plan is not sufficient to fix that, which is what
 `test_a_cert_entity_is_reachable_at_all` is for.
 """
 from __future__ import annotations
+
+import pathlib
 
 from umbra.core.models import EntityType
 from umbra.intent.plan import _DOMAIN_CORE, analyze_intent, select_collectors
@@ -104,11 +106,24 @@ def test_the_lake_is_still_queried_before_crtsh():
     assert _DOMAIN_CORE.index("ct_lake") < _DOMAIN_CORE.index("crtsh")
 
 
-def test_the_collector_count_is_unchanged():
-    """This slice reaches collectors that already existed. It adds none."""
+def test_the_collector_count_matches_what_the_docs_claim():
+    """Was pinned to 40 for the intent slice, which added no collectors. Pinning
+    a bare number means every later slice edits this file to say what it already
+    said; the invariant worth keeping is that the registry and the published
+    count agree, and tests/test_capability_claims.py enforces exactly that
+    against README, README-pypi and COLLECTORS.md. This keeps the local check
+    meaningful by comparing against the doc rather than a literal."""
+    import re
+
     from umbra.collectors.base import default_registry
 
-    assert len(default_registry().list()) == 40
+    import umbra
+
+    root = pathlib.Path(umbra.__file__).resolve().parents[2]
+    doc = (root / "docs" / "COLLECTORS.md").read_text()
+    claimed = re.search(r"\*\*Count: (\d+)\*\*", doc)
+    assert claimed, "COLLECTORS.md no longer states a count"
+    assert len(default_registry().list()) == int(claimed.group(1))
 
 
 def test_a_full_domain_intent_plans_all_three():

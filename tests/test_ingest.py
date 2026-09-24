@@ -349,3 +349,34 @@ def test_a_domain_list_produces_domain_seeds():
     result = ingest("domains.txt", b"evil-one.example\nevil-two.example\n")
     kinds = {s.type for s in result.plan.seeds if s.include}
     assert EntityType.DOMAIN in kinds
+
+
+def test_html_is_recognised_and_searched():
+    html = b"<html><a href=\"https://evil-domain.example/phish\">x</a></html>"
+    assert sniff("page.html", html) is Kind.HTML
+    result = ingest("page.html", html)
+    assert "evil-domain.example" in plan_values(result)
+
+
+def test_vcard_is_recognised():
+    vcf = b"BEGIN:VCARD\nFN:Example\nEMAIL:phish@evil-domain.example\nEND:VCARD\n"
+    assert sniff("contact.vcf", vcf) is Kind.VCF
+    result = ingest("contact.vcf", vcf)
+    assert "phish@evil-domain.example" in plan_values(result)
+
+
+def test_ics_is_recognised():
+    ics = b"BEGIN:VCALENDAR\nBEGIN:VEVENT\nURL:https://evil-domain.example/meet\nEND:VEVENT\nEND:VCALENDAR\n"
+    assert sniff("invite.ics", ics) is Kind.ICS
+
+
+def test_webp_magic_is_an_image():
+    data = b"RIFF" + b"\x00\x00\x00\x00" + b"WEBP" + b"\x00" * 16
+    assert sniff("pic.webp", data) is Kind.IMAGE
+
+
+def test_gzip_wrapper_is_inflated_then_read():
+    import gzip
+    inner = gzip.compress(IP_LIST.encode())
+    result = ingest("blocklist.txt.gz", inner)
+    assert "185.199.108.153" in plan_values(result)

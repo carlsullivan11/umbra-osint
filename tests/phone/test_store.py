@@ -143,6 +143,31 @@ def test_a_reported_number_is_never_purged(session):
     assert phone_store.purge_unreported(session, days=30) == 0
 
 
+def test_a_number_whose_only_report_was_retracted_is_kept(session):
+    """Retraction zeroes report_count but the report row stays. Deleting the
+    number would violate phone_reports' foreign key and abort the sweep."""
+    row = phone_store.get_or_create(session, "+14155550134")
+    key = phone_store.reporter_key("owner-1")
+    phone_store.add_report(session, row.id, key, "scam")
+    assert phone_store.retract(session, row.id, key)
+    assert row.report_count == 0
+    lookup = phone_store.get_or_create(session, "+14155550199")
+    row.created_at = lookup.created_at = utcnow() - timedelta(days=60)
+    session.commit()
+
+    assert phone_store.purge_unreported(session, days=30) == 1
+    assert session.get(PhoneNumber, row.id) is not None
+    assert session.get(PhoneNumber, lookup.id) is None
+
+
+def test_a_voted_on_number_is_kept(session):
+    row = phone_store.get_or_create(session, "+14155550134")
+    phone_store.cast_vote(session, row.id, phone_store.reporter_key("owner-2"), 1)
+    row.created_at = utcnow() - timedelta(days=60)
+    session.commit()
+    assert phone_store.purge_unreported(session, days=30) == 0
+
+
 def test_purge_is_disabled_by_a_zero_window(session):
     row = phone_store.get_or_create(session, "+14155550134")
     row.created_at = utcnow() - timedelta(days=999)

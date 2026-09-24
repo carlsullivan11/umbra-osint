@@ -8,6 +8,17 @@ from umbra.lake.people import PeopleLake
 from umbra.people.obituary_parse import parse_obituary_text
 
 
+def test_wal_and_a_bounded_busy_timeout_on_a_temp_lake(tmp_path: Path):
+    """The growth timer writes while the web serves reads; WAL plus a
+    bounded busy_timeout is what keeps that from producing "database is
+    locked" errors."""
+    lake = PeopleLake(tmp_path / "people.sqlite")
+    mode = lake._conn.execute("PRAGMA journal_mode").fetchone()[0]
+    timeout_ms = lake._conn.execute("PRAGMA busy_timeout").fetchone()[0]
+    assert mode.lower() == "wal"
+    assert timeout_ms == 5000
+
+
 def test_people_lake_upsert_and_lookup(tmp_path: Path):
     lake = PeopleLake(tmp_path / "people.sqlite")
     text = (

@@ -39,6 +39,37 @@ environment-specific bug the gate exists to catch.
 
 ---
 
+## Zen return codes are not interchangeable (2026-09-13)
+
+Rule 3 above was stated here from the start and broken one layer up: the
+*lookup* distinguished error from not-listed, and the *scoring* then collapsed
+them. `confidence = hit.weight if hit.listed else 0.5` gave a resolver failure
+and a confirmed negative the same 0.50. `ReputationHit.checked` now carries the
+distinction, `evidence_confidence()` scores an unchecked source at 0.1, and a
+lookup where **every** source errored returns `unknown` rather than `clean`.
+
+The codes themselves were also flattened — any Zen listing scored 0.6.
+
+| code | meaning | weight |
+|---|---|---|
+| `127.0.0.2` | SBL — direct spam source | 0.60 |
+| `127.0.0.3` | SBL CSS — snowshoe infrastructure | 0.50 |
+| `127.0.0.4`–`.7` | XBL — compromised device, open proxy, worm | 0.60 |
+| `127.0.0.9` | SBL DROP — hijacked netblock | 0.85 |
+| `127.0.0.10`, `.11` | **PBL — end-user address** | **0.00** |
+
+**PBL is a policy listing, not an accusation.** It says an address is end-user
+space that should not deliver mail directly, which is true of essentially every
+residential IP. On production, 53 of 692 listings were PBL-only and each was
+reported as `listed in zen.spamhaus.org (127.0.0.11)` at 0.6 — escalated to
+**suspicious** for being somebody's home broadband.
+
+PBL hits now carry `scope="policy"`, which `verdict_from_hits()` excludes from
+the verdict the same way it excludes Tor relay roles: **reported, never
+counted**. An unrecognised code is described verbatim rather than guessed at.
+
+---
+
 ## Unbound Docker image failure (historical)
 
 Attempts with `mvance/unbound` / `klutchell/unbound` failed:

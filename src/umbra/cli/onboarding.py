@@ -159,6 +159,7 @@ _LAKE_REMEDY = {
     "epss": "umbra epss sync",
     "public suffix": "umbra psl sync",
     "people": "umbra people seed",
+    "faa registry": "umbra faa sync",
 }
 
 _STALE_AFTER_DAYS = {
@@ -174,6 +175,8 @@ _STALE_AFTER_DAYS = {
     # everything but brand-new namespaces.
     "public suffix": 60,
     "people": 90,
+    # Refreshed daily by the FAA; ownership changes are the reason to care.
+    "faa registry": 30,
 }
 
 
@@ -245,70 +248,25 @@ def _lake_check(name: str, rows: int, newest: Any) -> DoctorCheck:
 
 
 def lake_checks(settings: Settings | None = None) -> list[DoctorCheck]:
-    """Freshness of every owned corpus. Never raises."""
+    """Freshness of every owned corpus. Never raises.
+
+    Renders `lake_inventory()` rather than reading the lakes itself. The
+    analytics in `umbra.analytics.lakes` snapshot the same readings, and two
+    independent readers is how a diagnostic and its monitor start disagreeing —
+    at which point the operator has to work out which one is lying before they
+    can act on either.
+    """
+    from umbra.lake.inventory import lake_inventory
+
     s = settings or get_settings()
     out: list[DoctorCheck] = []
-
-    try:
-        from umbra.lake.store import LakeStore
-
-        store = LakeStore.from_settings(s)
-        try:
-            abuse = store.abuse_stats()
-            feeds = abuse.get("feeds") or {}
-            newest = max((f.get("synced_at") for f in feeds.values() if f.get("synced_at")),
-                         default=None)
-            rows = int(abuse.get("urls", 0)) + int(abuse.get("iocs", 0)) + int(abuse.get("certs", 0))
-            out.append(_lake_check("abuse.ch", rows, newest))
-
-            ct = store.stats()
-            cps = ct.get("checkpoints") or {}
-            ct_newest = max((c.get("updated_at") for c in cps.values() if c.get("updated_at")),
-                            default=None)
-            out.append(_lake_check("certificate transparency", int(ct.get("certs", 0)), ct_newest))
-        finally:
-            close = getattr(store, "close", None)
-            if close:
-                close()
-    except Exception as exc:  # noqa: BLE001
-        out.append(DoctorCheck("abuse.ch lake", False, f"unreadable: {exc}", optional=True))
-
-    try:
-        from umbra.lake.geoip import GeoIpStore
-
-        st = GeoIpStore().status()
-        out.append(_lake_check("geoip", int(st.get("rows", 0)), st.get("imported_at")))
-    except Exception as exc:  # noqa: BLE001
-        out.append(DoctorCheck("geoip lake", False, f"unreadable: {exc}", optional=True))
-
-    try:
-        from umbra.lake.epss import EpssLake
-
-        st = EpssLake.from_settings(s).status()
-        out.append(_lake_check("epss", int(st.get("rows", 0)), st.get("imported_at")))
-    except Exception as exc:  # noqa: BLE001
-        out.append(DoctorCheck("epss lake", False, f"unreadable: {exc}", optional=True))
-
-    try:
-        from umbra.lake.psl import PublicSuffixList
-
-        st = PublicSuffixList.from_settings(s).status()
-        out.append(_lake_check("public suffix", int(st.get("rules", 0)), st.get("updated_at")))
-    except Exception as exc:  # noqa: BLE001
-        out.append(DoctorCheck("public suffix lake", False, f"unreadable: {exc}", optional=True))
-
-    try:
-        from umbra.lake.people import PeopleLake
-
-        lake = PeopleLake.from_settings(s)
-        try:
-            st = lake.status()
-            out.append(_lake_check("people", int(getattr(st, "people", 0)), None))
-        finally:
-            lake.close()
-    except Exception as exc:  # noqa: BLE001
-        out.append(DoctorCheck("people lake", False, f"unreadable: {exc}", optional=True))
-
+    for reading in lake_inventory(s):
+        if not reading.readable:
+            out.append(DoctorCheck(reading.lake + " lake", False,
+                                   reading.error or "unreadable", optional=True))
+            continue
+        out.append(_lake_check(reading.lake, int(reading.rows or 0),
+                               reading.synced_at))
     return out
 
 

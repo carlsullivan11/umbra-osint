@@ -460,6 +460,46 @@ def seeds_from_metadata(metadata: dict) -> list[IntentSeed]:
     return seeds
 
 
+
+def read_odf(data: bytes, notes: list[str]) -> dict:
+    """OpenDocument meta.xml — same honesty rule as OOXML."""
+    out: dict = {}
+    try:
+        archive = zipfile.ZipFile(io.BytesIO(data))
+    except (zipfile.BadZipFile, EOFError, ValueError) as exc:
+        notes.append(f"this file starts like a zip but could not be opened ({exc})")
+        return out
+    names = set(archive.namelist())
+    member = "meta.xml"
+    if member not in names:
+        notes.append("OpenDocument file has no meta.xml")
+        return out
+    try:
+        info = archive.getinfo(member)
+        if info.file_size > MAX_MEMBER_BYTES:
+            notes.append("meta.xml is implausibly large; not parsed")
+            return out
+        blob = archive.read(member)
+        root = ElementTree.fromstring(blob)
+    except Exception as exc:  # noqa: BLE001
+        notes.append(f"could not read meta.xml ({exc})")
+        return out
+    labels = {
+        "title": "Title", "creator": "Author", "generator": "Creator",
+        "initial-creator": "Author", "keyword": "Keywords",
+        "description": "Subject", "creation-date": "CreationDate",
+        "date": "ModDate",
+    }
+    for node in root.iter():
+        tag = node.tag.rsplit("}", 1)[-1]
+        label = labels.get(tag)
+        if label and (node.text or "").strip() and label not in out:
+            out[label] = node.text.strip()[:MAX_VALUE_LEN]
+    if not out:
+        notes.append("this OpenDocument has no meta.xml fields")
+    return out
+
+
 def read_metadata(kind: Kind, data: bytes) -> tuple[dict, list[IntentSeed], list[str]]:
     """Read one file's metadata. Returns `(fields, seeds, notes)`."""
     notes: list[str] = []
@@ -468,6 +508,8 @@ def read_metadata(kind: Kind, data: bytes) -> tuple[dict, list[IntentSeed], list
             metadata = read_image(data, notes)
         elif kind is Kind.OOXML:
             metadata = read_ooxml(data, notes)
+        elif kind is Kind.ODF:
+            metadata = read_odf(data, notes)
         elif kind is Kind.PDF:
             metadata = read_pdf(data, notes)
         else:

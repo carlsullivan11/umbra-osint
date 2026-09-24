@@ -264,6 +264,15 @@ def graph_from_lake(
     corps: Iterable[dict[str, Any]] = (),
     cameras: Iterable[dict[str, Any]] = (),
     sor: Iterable[dict[str, Any]] = (),
+    #: FEC contributors, accepted so `**enrichment_from_lakes(...)` stays a
+    #: valid call, and deliberately *not* turned into graph nodes.
+    #:
+    #: The obvious move would be an ORG node for the employer with an edge from
+    #: the person. That would assert employment on the strength of a name
+    #: appearing in a filing — the same name in the same ZIP is one row here
+    #: whether it is one person or three. The contributions are rendered as
+    #: their own list on the page instead, where the caller can label them.
+    fec: Iterable[dict[str, Any]] = (),
 ) -> tuple[list[EntityIn], list[EdgeIn]]:
     """Hydrate a case graph from people-lake rows (offline, no scrape)."""
     parse = {
@@ -423,12 +432,30 @@ def enrichment_from_lakes(people_lake, name: str, row: dict[str, Any] | None = N
     except Exception:
         cameras = cameras[:8]
     cameras = cameras[:8]
+    # FEC contributors. A separate lake and a separate list on purpose: a name
+    # in a campaign finance filing is a name that appears in a filing, not
+    # another confirmed fact about the person on screen. Optional and ~4 GB, so
+    # its absence must never break a person search.
+    fec: list[dict[str, Any]] = []
+    if q:
+        try:
+            from umbra.lake.fec import FecLake
+
+            fec_lake = FecLake()
+            try:
+                fec = fec_lake.lookup(q, limit=5)
+            finally:
+                fec_lake.close()
+        except Exception:  # noqa: BLE001 - an absent or broken lake is not an outage
+            fec = []
+
     return {
         "county": people_lake.county_for_name(q, limit=8) if q else [],
         "land": land,
         "corps": people_lake.corps_for_name(q, limit=5) if q else [],
         "cameras": cameras,
         "sor": sor,
+        "fec": fec,
     }
 
 

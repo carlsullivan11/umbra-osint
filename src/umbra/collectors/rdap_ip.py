@@ -6,6 +6,58 @@ from umbra.core.normalize import entity_key
 from umbra.db.schema import Entity
 
 
+def _abuse_email(data: dict) -> str | None:
+    """The abuse contact from an RDAP entity vcard, if the registry published one.
+
+    This is the single most actionable field in an RDAP record — it is who you
+    tell about the address — and it was being parsed out of the vcard array and
+    then dropped.
+    """
+    for ent in data.get("entities") or []:
+        roles = [str(r).lower() for r in (ent.get("roles") or [])]
+        if "abuse" not in roles:
+            continue
+        vcard = ent.get("vcardArray") or []
+        if len(vcard) < 2:
+            continue
+        for item in vcard[1]:
+            if isinstance(item, list) and len(item) >= 4 and item[0] == "email":
+                text = str(item[3]).strip()
+                if text:
+                    return text
+    return None
+
+
+def summarize_network(ip: str, data: dict) -> str:
+    """One line describing the network an address belongs to.
+
+    Replaces `f"RDAP network data for {ip}"`, which was true of every RDAP
+    response ever returned and therefore told a reader nothing. Everything here
+    was already fetched and stored in `raw`; only the summary was empty.
+    """
+    name = (data.get("name") or data.get("handle") or "").strip()
+    parts: list[str] = []
+
+    if name:
+        parts.append(str(name))
+    start, end = data.get("startAddress"), data.get("endAddress")
+    if start and end:
+        parts.append(f"{start}–{end}")
+    country = (data.get("country") or "").strip()
+    if country:
+        parts.append(str(country))
+    net_type = (data.get("type") or "").strip()
+    if net_type:
+        parts.append(str(net_type))
+
+    head = f"{ip} is in " + ", ".join(parts) if parts else f"{ip}: registry returned no network detail"
+
+    abuse = _abuse_email(data)
+    if abuse:
+        head += f" — abuse contact {abuse}"
+    return head
+
+
 class RdapIpCollector(BaseCollector):
     name = "rdap_ip"
     timeout_s = 20
@@ -97,7 +149,7 @@ class RdapIpCollector(BaseCollector):
                 collector=self.name,
                 source_name="RDAP-IP",
                 source_url=url,
-                summary=f"RDAP network data for {ip}",
+                summary=summarize_network(ip, data),
                 confidence=0.8,
                 raw=data,
                 entity_key=src_key,

@@ -5,11 +5,26 @@ from urllib.parse import urljoin, urlparse
 
 from umbra.collectors.base import BaseCollector, CollectorContext
 from umbra.core.models import CollectorResult, EdgeIn, EdgeType, EntityIn, EntityType, EvidenceIn
-from umbra.core.normalize import entity_key
+from umbra.core.normalize import entity_key, is_static_asset
 from umbra.db.schema import Entity
 
 _HREF_RE = re.compile(r"""href=["']([^"']+)["']""", re.I)
 _MAILTO_RE = re.compile(r"mailto:([^?\"'\s>]+)", re.I)
+
+#: How many same-host links get written into the evidence row's `raw`. Cheap —
+#: it is one JSON field, and it preserves the site's link structure.
+_MAX_LINKS_RECORDED = 40
+
+#: How many of those get promoted to URL *entities*. Expensive — each one is
+#: re-fetched by http_probe, tech_fingerprint and html_links, so the cost of this
+#: number is roughly 3x itself in requests against someone else's host.
+#:
+#: It was the same 40. A production search of sflix.today promoted 40 near-
+#: identical locale pages and produced 126 of its 159 evidence rows that way,
+#: including 42 http_probe rows carrying exactly one distinct value between them
+#: (server='cloudflare'). Link *structure* is worth recording; re-fingerprinting
+#: one host forty times is not.
+_MAX_URL_ENTITIES = 6
 
 _SOCIAL = {
     "github.com": "github",
@@ -69,6 +84,7 @@ class HtmlLinksCollector(BaseCollector):
         found_social: list[str] = []
         found_emails: list[str] = []
         found_urls: list[str] = []
+        promoted: list[str] = []
 
         for m in _MAILTO_RE.findall(html):
             em = m.strip().rstrip(".")
@@ -135,24 +151,53 @@ class HtmlLinksCollector(BaseCollector):
             else:
                 # same-site or external interesting links (limit)
                 if host == base_host.lower() or host.endswith("." + base_host.lower()):
-                    if abs_url not in found_urls and len(found_urls) < 40:
-                        found_urls.append(abs_url)
-                        result.entities.append(EntityIn(type=EntityType.URL, value=abs_url.split("?")[0][:500], confidence=0.5))
-                        result.edges.append(
-                            EdgeIn(
-                                source_key=src,
-                                target_key=entity_key(EntityType.URL, abs_url.split("?")[0][:500]),
-                                rel=EdgeType.LINKED_FROM,
-                                confidence=0.5,
-                            )
+                    # `_HREF_RE` matches every href, not only `<a href>`, so
+                    # `<link rel="icon">`, stylesheets, manifests and RSS feeds
+                    # arrive here too. Fingerprinting a favicon is not a finding.
+                    if is_static_asset(abs_url):
+                        continue
+                    # The site root is the domain entity that started this run.
+                    # Promoting it spends a slot re-probing what is already being
+                    # collected — and `https://host` and `https://host/` are the
+                    # same page, so it used to spend two.
+                    if not p.path.strip("/"):
+                        continue
+                    if abs_url in found_urls or len(found_urls) >= _MAX_LINKS_RECORDED:
+                        continue
+                    found_urls.append(abs_url)
+
+                    # Recording a link is free; promoting it to an entity is not.
+                    # Every URL entity is fetched again by http_probe,
+                    # tech_fingerprint and html_links. On sflix.today that meant
+                    # 40 same-host locale pages (/es, /fr, /de …) costing 126
+                    # evidence rows — for **one** distinct answer: 42 http_probe
+                    # rows all saying server='cloudflare'. A server stack is a
+                    # property of the host, not of each path on it.
+                    #
+                    # The full list stays in this evidence row's `raw`, so
+                    # nothing is lost from the record — only the crawling is.
+                    if len(promoted) >= _MAX_URL_ENTITIES:
+                        continue
+                    promoted.append(abs_url)
+                    result.entities.append(EntityIn(type=EntityType.URL, value=abs_url.split("?")[0][:500], confidence=0.5))
+                    result.edges.append(
+                        EdgeIn(
+                            source_key=src,
+                            target_key=entity_key(EntityType.URL, abs_url.split("?")[0][:500]),
+                            rel=EdgeType.LINKED_FROM,
+                            confidence=0.5,
                         )
+                    )
 
         result.evidence.append(
             EvidenceIn(
                 collector=self.name,
                 source_name="HTML extract",
                 source_url=page_url,
-                summary=f"Links from {page_url}: social={len(found_social)} email={len(found_emails)} urls={len(found_urls)}",
+                summary=(f"Links from {page_url}: social={len(found_social)} "
+                         f"email={len(found_emails)} urls={len(found_urls)}"
+                         + (f" ({len(promoted)} followed)"
+                            if len(promoted) < len(found_urls) else "")),
                 confidence=0.75,
                 raw={"social": found_social, "emails": found_emails, "urls": found_urls[:40]},
                 entity_key=src,

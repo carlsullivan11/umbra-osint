@@ -41,8 +41,9 @@ def logs() -> None:
 
 @ct_app.command("ingest")
 def ingest(
-    log: str = typer.Option("cloudflare_nimbus2025", "--log", "-l",
-                            help="log name from `ct logs`, or 'all'"),
+    log: str = typer.Option(None, "--log", "-l",
+                            help="log name from `ct logs`, or 'all' "
+                                 "(default: the first active shard)"),
     count: int = typer.Option(500, "--count", "-n", help="entries to ingest this run"),
     resume: bool = typer.Option(True, "--resume/--newest",
                                 help="resume from checkpoint, or tail the newest N"),
@@ -52,11 +53,17 @@ def ingest(
     settings = get_settings()
     store = LakeStore.from_settings(settings)
     http = _http()
-    targets = list(ctmod.KNOWN_LOGS) if log == "all" else [log]
+    targets = list(ctmod.KNOWN_LOGS) if log == "all" else [log or ctmod.default_log()]
     for name in targets:
         url = ctmod.KNOWN_LOGS.get(name)
         if not url:
-            rprint(f"[red]unknown log[/red] {name} (see `umbra ct logs`)")
+            # Name the reason. A retired shard is a different mistake from a
+            # typo, and the ingest timer spent nine months on the former.
+            if ctmod.log_status(name) == "retired":
+                rprint(f"[yellow]{name} is a retired shard[/yellow] — it accepts "
+                       "no new certificates. See `umbra ct logs`.")
+            else:
+                rprint(f"[red]unknown log[/red] {name} (see `umbra ct logs`)")
             continue
         try:
             _ingest_one(store, http, name, url, count, resume, batch)
@@ -132,6 +139,12 @@ def stats() -> None:
     rprint(f"[bold]Owned CT corpus[/bold]: {st['certs']:,} certs, "
            f"{st['distinct_domains']:,} distinct domains")
     for log, cp in st["checkpoints"].items():
-        pct = (cp["last_index"] / cp["tree_size"] * 100) if cp["tree_size"] else 0
-        rprint(f"  {log}: at {cp['last_index']:,} / {cp['tree_size']:,} "
-               f"({pct:.4f}% of log) — updated {cp['updated_at'][:19]}")
+        rprint(f"  {log}: "
+               f"{ctmod.describe_checkpoint(log, cp['last_index'], cp['tree_size'])}"
+               f" — updated {cp['updated_at'][:19]}")
+
+    # A corpus with no active log is frozen, and the per-log lines above do not
+    # add up to that conclusion on their own.
+    if not any(ctmod.log_status(name) == "active" for name in st["checkpoints"]):
+        rprint("[yellow]No active log has been ingested — the corpus cannot "
+               "grow. Run `umbra ct ingest` against a current shard.[/yellow]")

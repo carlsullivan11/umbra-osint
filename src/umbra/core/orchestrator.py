@@ -64,8 +64,26 @@ class Orchestrator:
             if s.type == "email" and "@" in s.value:
                 dom = s.value.split("@", 1)[1].lower()
                 parts = dom.split(".")
-                if len(parts) >= 2:
-                    apexes.add(".".join(parts[-2:]))
+                if len(parts) < 2:
+                    continue
+                apex = ".".join(parts[-2:])
+                # An address at a free-mail provider is not a reason to
+                # investigate the provider. `umbra.email.plan.FREE_MAIL` already
+                # makes this judgement for header analysis — "a scan of a mail
+                # provider that happens to have a billion other customers" —
+                # and `intent.extract` refuses to seed the domain for the same
+                # reason. The pivot layer did not, so `email_split` re-created
+                # the domain entity downstream and it pivoted anyway: one
+                # production search of a yahoo.com address returned 51 rows
+                # about Yahoo's hosting and 2 about the address.
+                #
+                # A corporate mail domain still pivots. There the domain *is*
+                # the organisation, which is the whole point of asking.
+                from umbra.email.plan import FREE_MAIL
+
+                if dom in FREE_MAIL or apex in FREE_MAIL:
+                    continue
+                apexes.add(apex)
         return apexes
 
     def _should_pivot(self, ent: Entity, seeds: list[Entity], apexes: set[str]) -> bool:
@@ -112,7 +130,16 @@ class Orchestrator:
         depth: int | None = None,
         max_entities: int | None = None,
         collectors: Iterable[str] | None = None,
+        max_seconds: float | None = None,
     ) -> dict:
+        """Run collectors over a case.
+
+        `max_seconds` overrides the global `job_max_seconds` for this run only.
+        A synchronous caller — the public reputation page — needs a budget sized
+        to what a visitor will wait, not the 1800s ceiling that suits a
+        background job. Exceeding it stops the run and records a note; it is
+        never a silent truncation.
+        """
         depth = depth if depth is not None else self.settings.default_depth
         max_entities = max_entities if max_entities is not None else self.settings.default_max_entities
         cols = self.registry.resolve_many(list(collectors) if collectors else None)
@@ -134,7 +161,10 @@ class Orchestrator:
 
         # Phase B4: bound the whole run, not just individual collectors.
         started_at = time.monotonic()
-        job_budget = float(getattr(self.settings, "job_max_seconds", 0) or 0)
+        job_budget = (
+            float(max_seconds) if max_seconds is not None
+            else float(getattr(self.settings, "job_max_seconds", 0) or 0)
+        )
         collector_timeout = float(getattr(self.settings, "collector_timeout_s", 0) or 0)
 
         # queue: (entity_id, depth_from_seed)

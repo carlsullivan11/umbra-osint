@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "umbra-osint"
-version = "0.2.1"
+version = "0.2.2"
 description = "Graph-first local OSINT platform for authorized investigations"
 # Not README.md: that one is written for someone standing in the repo, with a
 # 28-row index of relative `docs/` links that resolve to nothing on PyPI, plus

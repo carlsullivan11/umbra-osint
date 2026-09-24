@@ -2,7 +2,7 @@
 
 **Source of truth for installed collectors.** Generated from code behavior; keep in sync when adding collectors.
 
-**Count: 40** (verify: `umbra collectors`)
+**Count: 47** (verify: `umbra collectors`)
 
 ## Full table
 
@@ -12,7 +12,9 @@
 | `ip_geo` | ip | City/country/lat-lon from **owned** DB-IP City Lite lake | **Offline**; fill with `umbra geoip sync` (free CC-BY). Unsynced = unchecked |
 | `cve_lookup` | technology | Known-exploited CVEs (CISA KEV) affecting a product, from the **owned** corpus | **No API, no key**; bounded to KEV — absence means "not known-exploited", not "no CVEs" |
 | `crtsh` | domain | CT subdomains via crt.sh (multi-query + retry) | Public HTTP; flaky under load |
-| `ct_lake` | domain | CT subdomains + certs from the **owned** corpus (`umbra ct`), with SHA-256 fingerprints and issuing CAs | **No external API**; carries `fingerprint_sha1` for SSLBL join |
+| `ct_lake` | domain | CT subdomains + certs from the **owned** corpus (`umbra ct`), with SHA-256 fingerprints and issuing CAs | **No external API**; carries `fingerprint_sha1` for SSLBL join. **CT logs shard by year** — `KNOWN_LOGS` must be refreshed each January or the corpus silently freezes (`tests/test_ct_log_freshness.py` enforces it) |
+| `people_lake` | person | Owned person corpora — obituary/kinship people lake + **2.25M FEC contributor records** | **Offline**, no key. S1a/H3 — no collector imported `FecLake`, so the largest corpus Umbra owns was unreachable from a case. Evidence only: an FEC filing does not establish that a named person works somewhere. States the ambiguity count, because a shared name is not one person |
+| `email_profile` | email | Role account, disposable provider, provider class, and the form the address delivers to | **Offline**, no key. U6 — `EMAIL` had 3 collectors and a free-mail search returned 51 rows about the provider's hosting and 2 about the address |
 | `ddg_search` | domain, org, person, username | DuckDuckGo HTML search | Weak links; low score weight |
 | `dns_email_auth` | domain | SPF/DMARC/DKIM/MX + MTA-STS/TLS-RPT/BIMI/DNSSEC | DNS only (+ best-effort MTA-STS policy fetch) |
 | `dns_resolve` | domain | A/AAAA/MX/NS/TXT/CNAME | DNS only |
@@ -26,6 +28,9 @@
 | `http_probe` | domain, url | Status, title, headers + **server stack fingerprint** (header-name order hash, `Server`, same-origin favicon hash) | No key. Header **names** only, never values. Fingerprint ≠ identity; a CDN collides every site behind it |
 | `lookalike_domains` | domain | Typosquat generation + DNS resolve | Seeds preferred; noisy if overused |
 | `mac_oui` | mac | MAC → IEEE registrant from the **owned** OUI lake | **Offline, no key** |
+| `faa_registry` | aircraft | US **N-number → registrant of record + airframe** from the **owned** FAA Releasable Aircraft Database | **Offline, no key.** Registrant ≠ operator ≠ pilot. A miss is *unchecked*, never "not registered" (49 U.S.C. § 44114(b) withholding). Org registrant is a 0.6 candidate; an individual gets no PERSON entity. See `docs/FAA.md` |
+| `urlscan_io` | url, domain | **Existing public scans** from the urlscan.io corpus — uuid, permalink, scan time, verdict when present | **Read-only search.** Never POSTs a scan (no code path); no Chromium; no TCP to the target. Miss / 429 / bad key = *unchecked*, never "clean". Screenshot linked, not stored. Cap 5. Optional `UMBRA_URLSCAN_API_KEY`. See `docs/URLSCAN.md` |
+| `internetdb` | ip | **Shodan InternetDB index** — ports, hostnames, CPEs, tags, CVEs Shodan already observed | **Not a scan.** No key; only host contacted is `internetdb.shodan.io`; nothing sent to the address. 404/429 = *unchecked*, never "no open ports". IPv6/private/CGNAT skipped. CVE list is inferred from version banners. See `docs/INTERNETDB.md` |
 | `phone_validate` | phone | E.164 validate/format via libphonenumber | **Offline, no key**. Not live line, CNAM, or spam verdict |
 | `malware_infra` | domain, ip | Malware URLs + C2 attribution (URLhaus, ThreatFox, Feodo) from the **owned** abuse.ch lake | **No network** at collect time. Fill with `umbra abuse sync`. Miss is only clean if feeds were synced |
 | `opencorporates` | org, person | Company HTML search | Often captcha; prefer `wikidata` |
@@ -34,6 +39,8 @@
 | `county_records` | org, person | Allowlisted **GET** of curated portal pages; store links; parse **land (APN/situs)** and **corp (LLC/Inc)** candidates when the name is on the page | **No login, no PACER, no captcha bypass**. Miss ≠ identity |
 | `wifi_maps` | mac, location, person, org | WiGLE / OpenWifiMap / Deflock / WaveDigger **portals**; optional WiGLE BSSID API; OSM Overpass ALPR/cameras; operator Network Survey JSON | **No map-UI scrape**. Last-seen ≠ residence. Randomized MAC skipped |
 | `sex_offender_registry` | person | NSOPW + **every state registry homepage**; parse DOB/address/AKA when **first and last** name are on the page | Candidate only. No captcha, no photo dump, no identity claim |
+| `animal_registry` | person | Cited **animal-abuse findings** (convictions, pleas, government registry listings, civil orders) from the **owned** registry lake | **Offline**. Evidence only, no new person nodes; exact / first+last matches only (weaker counted, not reported). Charges are never stored; removed, expired, suppressed and disputed rows never surface. Empty lake = unknown, not clean. See `docs/ANIMAL-REGISTRY.md` |
+| `inmate_locator` | person | Federal **BOP inmate locator** JSON search — register number, facility, age when **first and last** name match a returned record | **No Chromium.** One documented JSON POST, no captcha bypass, no state DOC scrapers. Candidate only, `identity_confirmed: False`. Portal URL always stored, even on 403/error/captcha. FCRA note on every hit. See `docs/RECORDS.md` |
 | `obituary_search` | person | DDG discovery + allowlisted page scrape + **rich parse** (age/dates/places/funeral/kin) + **people lake** upsert (stores every source **link**) | `umbra people status\\|lookup`; weak until confirm |
 | `crypto_screen` | crypto_address | OFAC + curated labels from the **owned** crypto lake | **Offline**. Same as `umbra crypto screen` / `/crypto`. Empty lake = unchecked, not clean |
 
@@ -55,7 +62,7 @@
 `umbra playbook` runs the curated ordered set in `_PLAYBOOK_COLLECTORS`
 (`cli/playbook_cmd.py` — keep both in sync when adding a collector):
 
-`email_split`, `dns_resolve`, `dns_email_auth`, `rdap_domain`, `rdap_ip`, `asn_cymru`, `ip_geo`, `http_probe`, `tech_fingerprint`, `html_links`, `tls_cert`, `sslbl_cert`, `ct_lake`, `crtsh`, `security_txt`, `lookalike_domains`, `wayback_cdx`, `github_user`, `mac_oui`, `phone_validate`, `crypto_screen`, `wikidata`, `cve_lookup`, `github_commits`, `username_presence`, `gravatar`, `ddg_search`, `public_records_portals`, `county_records`, `wifi_maps`, `sex_offender_registry`, `obituary_search`, `court_records`, `edgar_search`, `opencorporates`, `hibp_breach`, `ip_reputation`, `domain_reputation`, `malware_infra`, `ransomware_exposure`
+`people_lake`, `email_profile`, `email_split`, `dns_resolve`, `dns_email_auth`, `rdap_domain`, `rdap_ip`, `asn_cymru`, `ip_geo`, `http_probe`, `tech_fingerprint`, `html_links`, `tls_cert`, `sslbl_cert`, `ct_lake`, `crtsh`, `security_txt`, `lookalike_domains`, `wayback_cdx`, `github_user`, `mac_oui`, `phone_validate`, `crypto_screen`, `wikidata`, `cve_lookup`, `github_commits`, `username_presence`, `gravatar`, `ddg_search`, `public_records_portals`, `county_records`, `wifi_maps`, `sex_offender_registry`, `animal_registry`, `inmate_locator`, `obituary_search`, `court_records`, `edgar_search`, `opencorporates`, `hibp_breach`, `ip_reputation`, `domain_reputation`, `malware_infra`, `ransomware_exposure`
 
 ## Owned GeoIP lake (DB-IP City Lite)
 
@@ -141,6 +148,28 @@ run it, because that page takes its host from an anonymous visitor.
 fingerprint block has something to show. The **IP** path stays passive — an IP
 has no hostname to offer as SNI, and `http_probe` is deliberately excluded from
 `PASSIVE_COLLECTORS` (`tests/test_ip_corpus.py`).
+
+**The page derives its collectors from the planner (2026-09-13).**
+`_collectors_for()` used to be a hand-written list per entity type. The IP side
+had a discipline that kept it honest — named exclusions with written reasons,
+and a test asserting the page equalled `_IP_CORE` minus those names. The domain
+side had none: four collectors, with `dns_resolve`, `dns_email_auth`,
+`rdap_domain`, `ct_lake`, `sslbl_cert`, `cve_lookup`, `security_txt` and
+`tech_fingerprint` absent for no recorded reason. An audit of 1,009 production
+cases found 94 domain lookups answered with a verdict and nothing to check it
+against.
+
+It now takes `select_collectors()` and subtracts `PUBLIC_EXCLUDED`, a mapping of
+name → reason. **The default is to serve**, so a new collector reaches visitors
+unless somebody writes down why it should not.
+`tests/test_public_collector_parity.py` fails on an undocumented omission.
+
+Currently withheld, all deliberate: `internetdb` (surfacing open ports for any
+address a stranger types is a product decision not yet made), `urlscan_io`
+(third-party shared quota), `crtsh` (rate-limits and 502s; `ct_lake` answers the
+same question offline). Widening the list also gave the page its own wall-clock
+budget — `PUBLIC_BUDGET_S`, passed to `Orchestrator.run(max_seconds=...)`, since
+`job_max_seconds` is 1800 and this path is synchronous.
 - **Tor sources, authoritative first.** The signed **directory-authority
   consensus** is the ground truth the others derive from, and nine servers
   publish it — redundancy against an outage or a hostile middlebox. Fetching

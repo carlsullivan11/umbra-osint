@@ -7,7 +7,7 @@ from typing import Any, Iterable
 
 from datetime import datetime, timedelta, timezone
 
-from sqlalchemy import func, select, update
+from sqlalchemy import func, or_, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
@@ -36,6 +36,68 @@ from umbra.db.schema import (
 )
 
 
+CASE_KINDS = frozenset({"sentinel", "intent", "reputation", "other"})
+CASE_BASES = frozenset({
+    "own_asset", "client_engagement", "public_cti", "training_lab", "other",
+})
+
+
+def classify_case_kind(case: Case) -> str:
+    """How the cases list labels a row.
+
+    Sentinel cases are named ``Scanned us: <ip>``. Reputation / phone lookups
+    keep that prefix. Intent (web or CLI) writes ``ui-intent:`` / ``intent:``
+    into the authorization note. Everything else is ``other``.
+    """
+    name = case.name or ""
+    note = case.authorization_note or ""
+    if name.startswith("Scanned us:"):
+        return "sentinel"
+    if name.startswith("Reputation:") or name.startswith("Phone:"):
+        return "reputation"
+    if note.startswith("ui-intent:") or note.startswith("intent:"):
+        return "intent"
+    return "other"
+
+
+def _case_filter_clauses(*, kind: str | None = None, basis: str | None = None,
+                         status: str | None = None, q: str | None = None):
+    """SQL clauses for the cases list. Unknown values are dropped, never 422."""
+    clauses: list = []
+    k = (kind or "").strip().lower()
+    if k in CASE_KINDS:
+        sentinel = Case.name.startswith("Scanned us:")
+        reputation = or_(Case.name.startswith("Reputation:"),
+                         Case.name.startswith("Phone:"))
+        intent = or_(
+            Case.authorization_note.startswith("ui-intent:"),
+            Case.authorization_note.startswith("intent:"),
+        )
+        if k == "sentinel":
+            clauses.append(sentinel)
+        elif k == "reputation":
+            clauses.append(reputation)
+        elif k == "intent":
+            clauses.append(intent)
+        else:
+            clauses.append(~or_(sentinel, reputation, intent))
+    b = (basis or "").strip()
+    if b in CASE_BASES:
+        clauses.append(Case.authorization_basis == b)
+    st = (status or "").strip().lower()
+    if st == "open":
+        clauses.append(Case.closed.is_(False))
+    elif st == "closed":
+        clauses.append(Case.closed.is_(True))
+    query = (q or "").strip()
+    if query:
+        escaped = (query.replace("\\", "\\\\")
+                        .replace("%", "\\%")
+                        .replace("_", "\\_"))
+        clauses.append(Case.name.ilike(f"%{escaped}%", escape="\\"))
+    return clauses
+
+
 class Repository:
     def __init__(self, session: Session, raw_dir: Path):
         self.session = session
@@ -62,26 +124,37 @@ class Repository:
         return self.session.get(Case, case_id)
 
     def list_cases(self, owner_id: str | None = None, *,
-                   limit: int | None = None, offset: int = 0) -> list[Case]:
+                   limit: int | None = None, offset: int = 0,
+                   kind: str | None = None, basis: str | None = None,
+                   status: str | None = None, q: str | None = None) -> list[Case]:
         """Every case, or only one owner's.
 
         `owner_id=None` means *no filter* — the operator view. A visitor always
         passes their own id, and cases with a NULL owner (CLI, or created before
         ownership existed) are deliberately excluded from that: they belong to
         the operator, not to whoever asks first.
+
+        `kind` / `basis` / `status` / `q` narrow the list. Unknown values are
+        ignored rather than erroring.
         """
         stmt = select(Case).order_by(Case.created_at.desc())
         if owner_id is not None:
             stmt = stmt.where(Case.owner_id == owner_id)
+        for clause in _case_filter_clauses(kind=kind, basis=basis, status=status, q=q):
+            stmt = stmt.where(clause)
         if limit is not None:
             stmt = stmt.limit(limit).offset(offset)
         return list(self.session.scalars(stmt))
 
-    def count_cases(self, owner_id: str | None = None) -> int:
+    def count_cases(self, owner_id: str | None = None, *,
+                    kind: str | None = None, basis: str | None = None,
+                    status: str | None = None, q: str | None = None) -> int:
         """How many cases exist for this viewer — the total behind a page."""
         stmt = select(func.count()).select_from(Case)
         if owner_id is not None:
             stmt = stmt.where(Case.owner_id == owner_id)
+        for clause in _case_filter_clauses(kind=kind, basis=basis, status=status, q=q):
+            stmt = stmt.where(clause)
         return int(self.session.scalar(stmt) or 0)
 
     def case_counts(self, case_ids: list[str]) -> dict[str, dict[str, int]]:

@@ -33,7 +33,7 @@ from pathlib import PurePosixPath, PureWindowsPath
 
 from umbra.email.parse import ParsedEmail
 from umbra.email.verdict import Finding
-from umbra.ingest.detect import Kind, decode, sniff
+from umbra.ingest.detect import Kind, TEXT_KINDS, META_KINDS, decode, sniff
 from umbra.intent.plan import select_collectors
 from umbra.intent.schema import IntentPlan
 
@@ -152,6 +152,19 @@ def ingest(
             notes=["the file is empty"],
         )
 
+    if data[:2] == b"\x1f\x8b":
+        try:
+            import gzip
+            import io
+            inflated = gzip.GzipFile(fileobj=io.BytesIO(data)).read(MAX_BYTES + 1)
+            notes.append(
+                "decompressed a gzip wrapper before sniffing the inner file"
+            )
+            data = inflated[:MAX_BYTES]
+            size = len(data)
+        except Exception:
+            notes.append("file starts like gzip but could not be inflated")
+
     kind = sniff(filename, data)
 
     try:
@@ -215,7 +228,7 @@ def _dispatch(kind: Kind, name: str, data: bytes, size: int, notes: list[str],
             "boundary_basis": parsed.boundary_basis,
         }
 
-    elif kind in {Kind.TEXT, Kind.CSV, Kind.JSON}:
+    elif kind in TEXT_KINDS:
         text = _read_text(data, notes)
         if kind is Kind.CSV:
             text, extra = csv_values(text)
@@ -230,7 +243,7 @@ def _dispatch(kind: Kind, name: str, data: bytes, size: int, notes: list[str],
             depth=depth, max_entities=max_entities)
         plan.extractor = f"ingest_{kind.value}_v1"
 
-    elif kind in {Kind.IMAGE, Kind.OOXML, Kind.PDF}:
+    elif kind in META_KINDS:
         from umbra.ingest.metadata import read_metadata
 
         metadata, meta_seeds, meta_notes = read_metadata(kind, data)
@@ -261,8 +274,9 @@ def _dispatch(kind: Kind, name: str, data: bytes, size: int, notes: list[str],
         plan = _empty_plan(
             f"Upload: {name}", authorization_basis,
             "Umbra does not have a reader for this file type, so nothing was "
-            "extracted. Supported: email messages, indicator lists, CSV, JSON, "
-            "images, PDF and Office documents.")
+            "extracted. Supported: email, txt/log, csv/tsv, json/ndjson, "
+            "html/xml/yaml, ics/vcf, images (jpeg/png/gif/tiff/webp/bmp), "
+            "PDF, Office (docx/xlsx/pptx) and OpenDocument.")
         notes.append(f"no reader for {kind.value} files")
 
     plan.raw_intent = (f"Uploaded {kind.value} file {name} ({size} bytes)")[:280]

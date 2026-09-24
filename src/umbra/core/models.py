@@ -39,6 +39,7 @@ class EntityType(str, Enum):
     VULNERABILITY = "vulnerability"
     MALWARE = "malware"
     CRYPTO_ADDRESS = "crypto_address"
+    AIRCRAFT = "aircraft"
 
 
 class EdgeType(str, Enum):

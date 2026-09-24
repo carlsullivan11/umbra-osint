@@ -38,15 +38,15 @@ _BASES = ["own_asset", "client_engagement", "public_cti", "training_lab", "other
 # Extends the original list with reputation/exposure and the offline abuse.ch
 # lake readers (malware_infra after domain_reputation; sslbl_cert after tls_cert).
 _PLAYBOOK_COLLECTORS = [
-    "email_split", "dns_resolve", "dns_email_auth", "rdap_domain", "rdap_ip",
+    "email_profile", "email_split", "dns_resolve", "dns_email_auth", "rdap_domain", "rdap_ip",
     "asn_cymru", "ip_geo", "http_probe", "tech_fingerprint", "html_links", "tls_cert",
     "sslbl_cert",
     "ct_lake", "crtsh", "security_txt", "lookalike_domains", "wayback_cdx", "github_user",
     "mac_oui", "phone_validate", "crypto_screen", "wikidata", "cve_lookup",
     "github_commits", "username_presence", "gravatar", "ddg_search",
-    "public_records_portals", "county_records", "wifi_maps", "sex_offender_registry", "obituary_search", "court_records", "edgar_search", "opencorporates",
+    "people_lake", "public_records_portals", "county_records", "wifi_maps", "sex_offender_registry", "animal_registry", "inmate_locator", "obituary_search", "court_records", "edgar_search", "opencorporates",
     "hibp_breach", "ip_reputation", "domain_reputation", "malware_infra",
-    "ransomware_exposure",
+    "ransomware_exposure", "faa_registry", "urlscan_io", "internetdb",
 ]
 
 

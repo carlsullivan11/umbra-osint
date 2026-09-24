@@ -32,6 +32,22 @@ _CAVEAT = (
 )
 
 
+def format_coords(lat: float | None, lon: float | None) -> str:
+    """Coordinates at the precision the source actually has.
+
+    DB-IP City Lite is city-grade, and the raw values arrive with six decimal
+    places — about 11 cm. Printed verbatim beside an anycast address that
+    resolves wherever you happen to ask from, that is a claim the data cannot
+    support, sitting directly under a `_CAVEAT` that says as much in words.
+
+    Two decimals is roughly 1.1 km: the right order for a city. The unrounded
+    values stay in `raw` for anyone who wants them.
+    """
+    if lat is None or lon is None:
+        return ""
+    return f"{round(float(lat), 2)},{round(float(lon), 2)}"
+
+
 class IpGeoCollector(BaseCollector):
     name = "ip_geo"
     timeout_s = 15
@@ -156,11 +172,7 @@ class IpGeoCollector(BaseCollector):
                 source_name="DB-IP City Lite (owned lake)",
                 source_url="https://db-ip.com/db/download/ip-to-city-lite",
                 summary=f"{ip_s} ≈ {label}"
-                + (
-                    f" ({hit.latitude},{hit.longitude})"
-                    if hit.latitude is not None and hit.longitude is not None
-                    else ""
-                ),
+                + (f" ({coords})" if (coords := format_coords(hit.latitude, hit.longitude)) else ""),
                 confidence=0.7,
                 raw=hit.as_dict(),
                 entity_key=src_key,

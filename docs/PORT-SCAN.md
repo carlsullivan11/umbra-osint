@@ -100,6 +100,15 @@ collector imports `umbra.scan` or if a scanner reaches the default registry, and
 `tests/test_web_scan.py` fails if an anonymous request ever gets anything but a
 404 from `/ops/scan`.
 
+## The passive alternative
+
+`internetdb` reads Shodan's existing index for an address and sends it nothing,
+so it runs on every authorization basis — including `public_cti`, where this
+scanner refuses. It answers "what has Shodan seen here", never "what is open
+now", and a Shodan miss is reported as unchecked rather than as nothing open.
+See `docs/INTERNETDB.md`. It does not import `umbra.scan` and does not relax
+any gate on this page.
+
 ## What it deliberately is not
 
 - **No SYN/FIN scanning.** Needs raw sockets, and its purpose is to stay out of

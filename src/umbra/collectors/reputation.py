@@ -48,9 +48,15 @@ class ReputationHit:
     #: What the source actually listed.
     #:   "domain"  — the domain itself is on a blocklist (Spamhaus DBL)
     #:   "content" — a URL *hosted on* the domain was listed (URLhaus, ThreatFox)
+    #:   "policy"  — a listing that is not an accusation (Spamhaus PBL: "this is
+    #:               an end-user address"). Reported, never allowed to decide.
     #: Defaults to "domain", the conservative reading: a hit that does not say
     #: otherwise is treated as being about the host.
     scope: str = "domain"
+    #: Whether the source actually answered. `listed=False` alone cannot say
+    #: whether the source said *no* or could not be reached, and those are not
+    #: the same claim. False means unchecked: no evidence either way.
+    checked: bool = True
 
 
 # Verdict thresholds on the weighted max signal.
@@ -79,6 +85,13 @@ _PROVIDER = {
 #: spamhaus_zen 0.6 up to 0.70 — turning "suspicious" into "malicious" partly
 #: because the address is an exit node. Reported, never counted.
 _NON_ACCUSATORY = {"tor_exit", "tor_relay"}
+
+#: Sources whose score is an **aggregate of third-party complaints** rather than
+#: a specific finding about the host. The number is real; what it measures
+#: depends on who the host is. On a Tor relay it mostly measures how much
+#: traffic strangers pushed through it, so it is reported and not allowed to
+#: decide — see `verdict_from_hits`. Everywhere else it decides normally.
+_AGGREGATE_SOURCES = {"abuseipdb"}
 
 #: The most any combination of sources may assert. Evidence accumulates; proof
 #: does not arrive.
@@ -150,9 +163,33 @@ def verdict_from_hits(hits: list[ReputationHit],
     if not hits:
         return "unknown", 0, []
     if not listed:
+        # Nothing fired — but "no source said yes" and "no source answered" are
+        # different claims. An address whose every lookup errored used to come
+        # back clean, which is the one thing this codebase refuses to say.
+        if not any(h.checked for h in hits):
+            return "unknown", 0, []
         return "clean", 0, []
+    # A Tor relay's address collects community reports as a *baseline*: traffic
+    # from thousands of strangers exits through it and the complaints land on
+    # the relay. AbuseIPDB rates a busy exit at 100% for that reason alone, and
+    # enabling the key turned "running a relay" into malicious 99/100 on its own
+    # — the exact outcome `_NON_ACCUSATORY` was written to prevent, arriving
+    # through a source that guard does not name.
+    #
+    # So an *aggregate* score cannot decide a verdict about a relay. A
+    # *specific* listing still can: Feodo naming it as C2, or URLhaus serving
+    # malware from it, is an accusation about this host and is untouched. The
+    # distinction is the same one `platform` already draws — a malware URL on
+    # GitHub is a fact about somebody's upload, not about GitHub.
+    on_tor = any(h.source in _NON_ACCUSATORY for h in hits)
+
     deciding = [h for h in listed
                 if not (platform is not None and h.scope == "content")
+                # A policy listing (Spamhaus PBL) is a statement about what kind
+                # of address this is, not about what it has done. Reported in
+                # the source list below, never allowed to set a verdict.
+                and h.scope != "policy"
+                and not (on_tor and h.source in _AGGREGATE_SOURCES)
                 and h.source not in _NON_ACCUSATORY]
     if not deciding:
         # Everything that fired was about content the public uploaded, or was a
@@ -214,6 +251,65 @@ def parse_urlhaus_host(data: dict[str, Any]) -> ReputationHit:
     )
 
 
+@dataclass(frozen=True)
+class ZenClass:
+    """What a set of Spamhaus Zen return codes actually means."""
+    label: str
+    weight: float
+    #: True when every code is a policy listing (PBL) — see `_ZEN_CODES`.
+    policy_only: bool
+
+
+#: Spamhaus Zen return codes, their meaning, and how much each is worth.
+#:
+#: The weights were flat at 0.6 for every code. That made DROP — a hijacked
+#: netblock Spamhaus tells you not to route — score identically to PBL, which
+#: means "this is somebody's home internet connection".
+#:
+#: PBL carries weight 0.0 deliberately. It is a *policy* listing: it says an
+#: address is end-user space that should not be delivering mail directly, which
+#: is true of nearly every residential IP and is not evidence of anything.
+_ZEN_CODES: dict[str, tuple[str, float]] = {
+    "127.0.0.2": ("SBL — direct spam source", 0.60),
+    "127.0.0.3": ("SBL CSS — snowshoe spam infrastructure", 0.50),
+    "127.0.0.4": ("XBL — compromised device, open proxy or worm", 0.60),
+    "127.0.0.5": ("XBL — compromised device, open proxy or worm", 0.60),
+    "127.0.0.6": ("XBL — compromised device, open proxy or worm", 0.60),
+    "127.0.0.7": ("XBL — compromised device, open proxy or worm", 0.60),
+    "127.0.0.9": ("SBL DROP — hijacked or leased-to-criminals netblock", 0.85),
+    "127.0.0.10": ("PBL — end-user address, should not send mail directly", 0.0),
+    "127.0.0.11": ("PBL — end-user address, should not send mail directly", 0.0),
+}
+
+_PBL_CODES = {"127.0.0.10", "127.0.0.11"}
+
+
+def classify_zen_codes(codes: list[str]) -> ZenClass:
+    """Interpret Zen return codes into a label and a severity.
+
+    The worst code decides. An address on both XBL and PBL is a compromised
+    machine that happens to be residential — the compromise is the finding, and
+    the residential part is context.
+
+    An unrecognised code is reported verbatim at the default weight rather than
+    guessed at. Spamhaus can add codes; inventing a meaning for one is worse
+    than admitting the code is unfamiliar.
+    """
+    known = [c for c in codes if c in _ZEN_CODES]
+    unknown = [c for c in codes if c not in _ZEN_CODES]
+
+    parts = [_ZEN_CODES[c][0] for c in known]
+    weight = max((_ZEN_CODES[c][1] for c in known), default=0.0)
+
+    if unknown:
+        parts.extend(f"unrecognised code {c}" for c in unknown)
+        weight = max(weight, 0.60)
+
+    policy_only = bool(codes) and not unknown and all(c in _PBL_CODES for c in codes)
+    label = "; ".join(dict.fromkeys(parts)) or "listed"
+    return ZenClass(label=label, weight=weight, policy_only=policy_only)
+
+
 def dnsbl_hit(source: str, weight: float, zone: str, res: DnsblResult) -> ReputationHit:
     """Build a ReputationHit from a classified DNSBL result.
 
@@ -221,21 +317,62 @@ def dnsbl_hit(source: str, weight: float, zone: str, res: DnsblResult) -> Reputa
     An "error" result (e.g. a `127.255.255.x` refusal from querying via a public
     resolver) is NOT a listing — it must not flag a clean address as malicious,
     which was the core bug in the previous DNS solution.
+
+    An error is also not a *clean* result, which was the next bug: `checked`
+    carries that distinction so scoring can tell "this source said no" from
+    "this source never answered".
+
+    For Spamhaus Zen the return codes decide both the wording and the weight;
+    `weight` is the caller's default, used only where the codes say nothing
+    more specific.
     """
     listed = res.status == "listed"
+    checked = res.status in {"listed", "not_listed"}
+    scope = "domain"
+    hit_weight = 0.0
+
     if listed:
-        detail = f"listed in {zone} ({', '.join(res.codes)})"
+        if zone.endswith("zen.spamhaus.org"):
+            zc = classify_zen_codes(list(res.codes))
+            hit_weight = zc.weight
+            scope = "policy" if zc.policy_only else "domain"
+            detail = (f"listed in {zone}: {zc.label} "
+                      f"({', '.join(res.codes)})")
+            if zc.policy_only:
+                # Said plainly, because "listed in Spamhaus" reads as an
+                # accusation to every reader who has not memorised the codes.
+                detail += " — a policy listing, not a report of abuse"
+        else:
+            hit_weight = weight
+            detail = f"listed in {zone} ({', '.join(res.codes)})"
     elif res.status == "error":
         detail = f"{zone} check error: {res.detail}"
     else:
         detail = f"not listed in {zone}"
+
     return ReputationHit(
         source=source,
         listed=listed,
-        weight=weight if listed else 0.0,
+        weight=hit_weight,
         detail=detail,
         url="https://check.spamhaus.org/results/",
+        scope=scope,
+        checked=checked,
     )
+
+
+def evidence_confidence(hit: ReputationHit) -> float:
+    """Confidence to record on the evidence row for one source.
+
+    Three states, not two. A source that could not be reached asserts nothing,
+    and recording that at the same 0.5 as a confirmed negative is how "unchecked"
+    became indistinguishable from "clean" in the collector users hit most.
+    """
+    if hit.listed:
+        return hit.weight
+    if not hit.checked:
+        return 0.1
+    return 0.5
 
 
 # --- feed cache (download-once blocklists) --------------------------------
@@ -432,7 +569,7 @@ class IpReputationCollector(BaseCollector):
             source_name=hit.source,
             source_url=hit.url,
             summary=hit.detail,
-            confidence=hit.weight if hit.listed else 0.5,
+            confidence=evidence_confidence(hit),
             raw=hit.raw,
             entity_key=key,
         ))

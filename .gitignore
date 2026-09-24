@@ -46,3 +46,4 @@ venv.bak/
 
 # Local Claude Code settings (machine-specific infra access)
 .claude/settings.local.json
+.coverage

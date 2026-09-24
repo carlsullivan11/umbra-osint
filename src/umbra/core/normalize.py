@@ -71,6 +71,15 @@ def normalize_value(entity_type: EntityType | str, value: str) -> str:
         if not e164:
             raise ValueError(f"invalid phone number: {value!r}")
         return e164
+    if t == EntityType.AIRCRAFT:
+        # Canonical N-number, so "N-123AB", "n123ab" and the FAA file's own
+        # "123AB" are one entity rather than three.
+        from umbra.lake.faa import normalize_n_number
+
+        n = normalize_n_number(v)
+        if not n:
+            raise ValueError(f"invalid N-number: {value!r}")
+        return n
     if t == EntityType.CRYPTO_ADDRESS:
         from umbra.crypto.normalize import detect_and_normalize
 
@@ -103,3 +112,51 @@ def parent_domain(domain: str) -> str | None:
 
 def is_email(value: str) -> bool:
     return bool(_EMAIL_RE.match(value.strip()))
+
+
+#: File extensions that mark a URL as a resource a page *references* rather than
+#: a page worth investigating. Fonts, styles, scripts, images, media, manifests
+#: and feeds — things a browser fetches to render, not things a person reads.
+_ASSET_SUFFIXES = frozenset({
+    # images
+    "png", "jpg", "jpeg", "gif", "svg", "webp", "avif", "ico", "bmp", "tiff",
+    # styles and scripts
+    "css", "js", "mjs", "map",
+    # fonts
+    "woff", "woff2", "ttf", "otf", "eot",
+    # media
+    "mp3", "mp4", "webm", "ogg", "wav", "avi", "mov", "m3u8", "ts",
+    # documents a crawler should not treat as navigation
+    "zip", "gz", "tar", "rar", "7z", "dmg", "exe", "msi", "apk",
+    # machine-readable page furniture
+    "webmanifest", "xml", "rss", "atom",
+})
+
+
+def is_static_asset(url: str) -> bool:
+    """True when a URL points at page furniture rather than a page.
+
+    `html_links` extracts with a regex matching **every** `href`, not only
+    `<a href>`, so `<link rel="icon">`, stylesheets, manifests and RSS feeds all
+    became URL entities. On one production search that turned 42 discovered URLs
+    into 126 evidence rows — `http_probe`, `tech_fingerprint` and `html_links`
+    re-run on each — burying the real answer and spending 42 requests on someone
+    else's host to fingerprint their favicons.
+
+    Judged on the **last path segment only**, and only when it actually carries
+    an extension. `/css-frameworks` and `/blog/png-vs-webp` are articles; a naive
+    substring test would drop them.
+    """
+    text = (url or "").strip()
+    if not text:
+        return False
+    # Strip query and fragment: `/a.png?v=8e1bcc8f82` is still a PNG, and
+    # `/search?q=logo.png` is still a search page.
+    path = text.split("#", 1)[0].split("?", 1)[0]
+    if "://" in path:
+        path = path.split("://", 1)[1]
+        path = path[path.find("/"):] if "/" in path else ""
+    last = path.rstrip("/").rsplit("/", 1)[-1]
+    if "." not in last:
+        return False
+    return last.rsplit(".", 1)[-1].lower() in _ASSET_SUFFIXES

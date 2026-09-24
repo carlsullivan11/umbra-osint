@@ -418,6 +418,32 @@ class PageView(Base):
     props: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
 
 
+class LakeSnapshot(Base):
+    """One reading of one owned lake: how many rows, and how fresh.
+
+    `umbra doctor` already reports both, but only for *now*. That catches a
+    lake nobody is syncing and misses the more dangerous failure — a sync that
+    ran, returned HTTP 200, and brought back less than it should have. The Tor
+    fetch from dan.me.uk did exactly that: 12KB where 2.4MB was expected, every
+    per-request check passing. The only signal was the row count against the
+    previous day's.
+
+    Kept as an append-only series rather than a mutable "current state" row,
+    because the comparison *is* the signal.
+    """
+
+    __tablename__ = "lake_snapshots"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True)
+    ts: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+    lake: Mapped[str] = mapped_column(String(64), index=True)
+    rows: Mapped[int] = mapped_column(Integer, default=0)
+    #: When the lake itself last ingested, as distinct from when we looked at
+    #: it. Null when the lake cannot say.
+    synced_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True)
+
+
 class SentinelObservation(Base):
     """A request to Umbra that looked like scanning, and the address it came from.
 

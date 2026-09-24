@@ -304,3 +304,45 @@ def email_command(
     from umbra.cli.plan_exec import confirm_and_run
 
     confirm_and_run(plan, source="cli_email", action="email.confirm")
+
+
+def search_command(
+    path: str = typer.Argument(..., help="File to search (txt, csv, json, html, ...)"),
+    basis: str = typer.Option("own_asset", "--basis", "-b",
+                              help="|".join(sorted(_BASES))),
+    note: str = typer.Option("", "--note", "-n"),
+    depth: int = typer.Option(1, "--depth", "-d"),
+    only: list[str] = typer.Option([], "--only"),
+    drop: list[str] = typer.Option([], "--drop"),
+    trusted_domain: list[str] = typer.Option([], "--trusted-domain"),
+    json_out: bool = typer.Option(False, "--json"),
+    confirm: bool = typer.Option(False, "--confirm"),
+) -> None:
+    """Search a file for identifiers (IPs, domains, emails, URLs, ...).
+
+    Same engine as `umbra file`. Nothing is collected until --confirm.
+    """
+    file_command(path, basis, note, depth, only, drop, trusted_domain,
+                 json_out, confirm)
+
+
+def analyze_command(
+    path: str = typer.Argument(..., help="File to analyze (pdf, jpg, eml, docx, ...)"),
+    basis: str = typer.Option("own_asset", "--basis", "-b",
+                              help="|".join(sorted(_BASES))),
+    note: str = typer.Option("", "--note", "-n"),
+    depth: int = typer.Option(1, "--depth", "-d"),
+    only: list[str] = typer.Option([], "--only"),
+    drop: list[str] = typer.Option([], "--drop"),
+    trusted_domain: list[str] = typer.Option([], "--trusted-domain"),
+    json_out: bool = typer.Option(False, "--json"),
+    confirm: bool = typer.Option(False, "--confirm"),
+) -> None:
+    """Extract metadata and identifiers from a file.
+
+    PDF Info/XMP, image EXIF/GPS, email headers, Office/OpenDocument props.
+    Same engine as `umbra file`. Nothing is collected until --confirm.
+    """
+    file_command(path, basis, note, depth, only, drop, trusted_domain,
+                 json_out, confirm)
+

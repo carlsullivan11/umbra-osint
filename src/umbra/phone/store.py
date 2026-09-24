@@ -27,7 +27,7 @@ from datetime import timedelta
 from typing import Any
 from uuid import uuid4
 
-from sqlalchemy import func, select
+from sqlalchemy import exists, func, select
 
 from umbra.core.models import utcnow
 from umbra.db.schema import (
@@ -447,7 +447,11 @@ def purge_unreported(session, days: int = UNREPORTED_RETENTION_DAYS) -> int:
 
     Zero disables the sweep, matching `case_retention_days`. A number with
     reports is never touched: those rows exist because somebody wrote something,
-    not because somebody searched.
+    not because somebody searched. That means any report row, retracted or
+    hidden included, and any vote. `report_count` only counts live reports, so
+    it cannot be the test: a number whose one report was retracted reads zero
+    while its report still holds the foreign key, and deleting it would fail
+    the whole sweep.
     """
     if not days or days <= 0:
         return 0
@@ -456,6 +460,8 @@ def purge_unreported(session, days: int = UNREPORTED_RETENTION_DAYS) -> int:
         select(PhoneNumber).where(
             PhoneNumber.created_at < cutoff,
             PhoneNumber.report_count == 0,
+            ~exists().where(PhoneReport.phone_id == PhoneNumber.id),
+            ~exists().where(PhoneVote.phone_id == PhoneNumber.id),
         )
     ).scalars().all()
     for row in stale:

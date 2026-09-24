@@ -69,6 +69,81 @@ def _asn_peer(asn: str, resolver: dns.resolver.Resolver) -> list[str]:
         return []
 
 
+def summarize_origin(ip: str, rows: list[dict]) -> str:
+    """One line describing which AS announces an address.
+
+    Replaces `f"Cymru origin for {ip}: {parsed}"`, which interpolated a list of
+    dicts and shipped a Python `repr` into the UI — 1,633 evidence rows on
+    production opened with `[{'asn': '13335', 'prefix': ...`.
+
+    **Count distinct ASNs, not rows.** Cymru answers with one row per matching
+    prefix, so a single AS announcing an aggregate and a more-specific returns
+    two rows. For 104.21.21.161 that is:
+
+        13335 | 104.21.0.0/19  | US | arin
+        13335 | 104.21.16.0/20 | US | arin
+
+    — ordinary Cloudflare routing. An earlier version of this function counted
+    rows and rendered it as "AS13335 and AS13335 … (multiple origins: multi-homed
+    or a route leak)", which prints the AS twice and raises a hijack flag on a
+    security-relevant field for a completely normal announcement. MOAS means
+    *distinct* origin ASNs on one prefix, and only that is worth flagging.
+    """
+    if not rows:
+        return f"{ip}: no origin AS announced (not in the global routing table)"
+
+    # Dedupe by ASN, keeping the first name seen for each.
+    labels: dict[str, str] = {}
+    for row in rows:
+        asn = str(row.get("asn") or "").strip()
+        if not asn:
+            continue
+        key = asn.upper().removeprefix("AS")
+        if key in labels:
+            continue
+        label = f"AS{key}"
+        name = (row.get("as_name") or "").strip()
+        if name:
+            label += f" ({name})"
+        labels[key] = label
+
+    if not labels:
+        return f"{ip}: no origin AS announced (not in the global routing table)"
+
+    # The most specific prefix is the one actually carrying the route to this
+    # address. Picking `rows[0]` made the answer depend on Cymru's ordering.
+    def _bits(row: dict) -> int:
+        prefix = (row.get("prefix") or "")
+        _, _, length = prefix.partition("/")
+        try:
+            return int(length)
+        except ValueError:
+            return -1
+
+    best = max(rows, key=_bits)
+    tail: list[str] = []
+    prefix = (best.get("prefix") or "").strip()
+    if prefix:
+        tail.append(f"prefix {prefix}")
+    cc = (best.get("cc") or "").strip()
+    if cc:
+        tail.append(cc)
+    registry = (best.get("registry") or "").strip()
+    if registry:
+        tail.append(registry.upper())
+
+    pieces = list(labels.values())
+    lead = " and ".join(pieces) if len(pieces) > 1 else pieces[0]
+    line = f"{ip} announced by {lead}"
+    if tail:
+        line += " — " + ", ".join(tail)
+    if len(pieces) > 1:
+        # Genuinely distinct origin ASNs. Worth a reader's attention: it is
+        # either multi-homing or a hijack, and this data cannot tell you which.
+        line += f" ({len(pieces)} distinct origin ASNs — multi-homed, or a hijack)"
+    return line
+
+
 class AsnCymruCollector(BaseCollector):
     name = "asn_cymru"
     timeout_s = 15
@@ -99,9 +174,9 @@ class AsnCymruCollector(BaseCollector):
             prefix = parts[1] if len(parts) > 1 else ""
             cc = parts[2] if len(parts) > 2 else ""
             registry = parts[3] if len(parts) > 3 else ""
-            parsed.append(
-                {"asn": asn, "prefix": prefix, "cc": cc, "registry": registry, "raw": row}
-            )
+            record = {"asn": asn, "prefix": prefix, "cc": cc,
+                      "registry": registry, "raw": row}
+            parsed.append(record)
             if asn and asn.isdigit():
                 as_id = f"AS{asn}"
                 # AS name
@@ -112,6 +187,10 @@ class AsnCymruCollector(BaseCollector):
                     np = [p.strip() for p in name_rows[0].split("|")]
                     if len(np) >= 5:
                         as_name = np[4]
+                # Carried on the record so the summary can name the operator.
+                # It was resolved here, attached to the ASN entity, and left out
+                # of the one line a human reads.
+                record["as_name"] = as_name
                 result.entities.append(
                     EntityIn(
                         type=EntityType.ASN,
@@ -160,7 +239,7 @@ class AsnCymruCollector(BaseCollector):
                 collector=self.name,
                 source_name="Team Cymru DNS",
                 source_url="https://www.team-cymru.com/ip-asn-mapping",
-                summary=f"Cymru origin for {ip}: {parsed}",
+                summary=summarize_origin(ip, parsed),
                 confidence=0.9,
                 raw={"rows": rows, "parsed": parsed},
                 entity_key=src,

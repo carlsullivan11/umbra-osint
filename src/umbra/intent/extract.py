@@ -85,6 +85,12 @@ _USERNAME_PROBE_KW = re.compile(
 _WEB_KW = re.compile(r"(?i)\b(google|search.?web|web.?search|ddg|duckduckgo)\b")
 _WAYBACK_KW = re.compile(r"(?i)\b(wayback|archive\.org|historical.?site|old.?website)\b")
 
+# US aircraft registration ("tail number"). Bounded on both sides so it cannot
+# fire inside a hostname, an email local part, or a longer hex run.
+_N_NUMBER_RE = re.compile(
+    r"(?<![A-Za-z0-9._@\-])([Nn]-?\d(?:-?[A-Za-z0-9]){0,4})(?![A-Za-z0-9._@\-])"
+)
+
 # Soft person: "Name Name" two capitalized tokens (conservative)
 _PERSON_RE = re.compile(
     r"\b([A-Z][a-z]{1,20})\s+([A-Z][a-z]{1,20})(?:\s+([A-Z][a-z]{1,20}))?\b"
@@ -113,6 +119,47 @@ _NOT_A_NAME = {
 }
 # Above this many words a query is a sentence, not a name someone typed.
 _BARE_QUERY_MAX_WORDS = 3
+
+#: Words that mark a bare query as an organisation rather than a person, so it
+#: keeps running without an opt-in. Anything name-shaped and *without* one of
+#: these is seeded as a person instead — see `_looks_like_a_person`.
+_ORG_MARKER = {
+    "inc", "inc.", "llc", "l.l.c.", "ltd", "ltd.", "limited", "corp", "corp.",
+    "corporation", "co", "co.", "company", "plc", "gmbh", "ag", "sa", "nv",
+    "bv", "pty", "llp", "lp", "holdings", "group", "partners", "ventures",
+    "capital", "labs", "technologies", "technology", "systems", "solutions",
+    "services", "industries", "foundation", "institute", "university",
+    "college", "hospital", "bank", "insurance", "media", "studios", "games",
+    "software", "security", "networks", "telecom", "energy", "motors", "&",
+}
+
+
+def _looks_like_a_person(words: list[str]) -> bool:
+    """True when a bare query is name-shaped.
+
+    The person consent gate used to be one keystroke wide. "Dustin Moore" hits
+    the capitalized-name rule and is seeded PERSON at 0.6 — below the inclusion
+    threshold, so N1's declaration is required. "dustin moore" misses that rule,
+    falls to the bare-query fallback, and was seeded ORG at 0.55, which is
+    exactly the include threshold. Organisations need no opt-in, so the same
+    person ran immediately depending on the shift key.
+
+    Two or three alphabetic words with no corporate marker is the shape of a
+    name. One word is a brand — `Cloudflare` is the query the bare fallback was
+    written for.
+
+    **This errs toward the gate.** "united airlines" will be read as a person
+    and asked for a basis. Being asked to declare before searching an airline is
+    a smaller harm than searching a person without declaring, which is the error
+    this project said it would not make.
+    """
+    if not 2 <= len(words) <= _BARE_QUERY_MAX_WORDS:
+        return False
+    if any(w.lower().strip(".,") in _ORG_MARKER for w in words):
+        return False
+    # Initials are ordinary in a name ("janice m miller") and rare in a brand.
+    return all(w.replace("'", "").replace("-", "").replace(".", "").isalpha()
+               for w in words)
 
 _ORG_HINT_RE = re.compile(
     r"(?i)\b(?:company|org|organization|employer|corp(?:oration)?)\s*[:\-]?\s+"
@@ -222,6 +269,16 @@ def extract_hits(text: str) -> list[_Hit]:
     # into MAC seeds.
     for mac in find_macs(text):
         add(EntityType.MAC, mac, 0.95, mac)
+
+    # US aircraft registrations. N + a digit + up to four more alphanumerics,
+    # hyphens optional. The lookarounds are the whole difficulty: without them
+    # "n123ab.example.com" and "n123ab@example.com" both yield an aircraft, and
+    # a 12-hex commit prefix yields one too. Requiring a *digit* after the N is
+    # what keeps "NASA", "Nginx" and "November" out.
+    for m in _N_NUMBER_RE.finditer(text):
+        tail = _safe_norm(EntityType.AIRCRAFT, m.group(0))
+        if tail:
+            add(EntityType.AIRCRAFT, tail, 0.9, m.group(0))
 
     # Phone numbers (libphonenumber matcher). Before domain-ish tokens so a
     # bare NANP paste becomes PHONE, not a failed bare-org fallback.
@@ -365,12 +422,21 @@ def extract_hits(text: str) -> list[_Hit]:
                 and any(c.isalpha() for c in plain)
                 and all(w.lower() not in _NOT_A_NAME for w in plain.split())
             ):
-                # 0.55 is exactly the include threshold: the seed is runnable,
-                # and it is still the least confident thing the extractor emits.
-                # Below it, typing "Cloudflare" would produce a plan with
-                # nothing selected — which is what it did before this existed.
-                add(EntityType.ORG, plain, 0.55, plain,
-                    notes="assumed from a bare query — uncheck if wrong")
+                # Below the include threshold, typing "Cloudflare" produced a
+                # plan with nothing selected — which is what it did before this
+                # fallback existed.
+                if _looks_like_a_person(plain.split()):
+                    # 0.6 matches the capitalized-name rule, which is the point:
+                    # the same query must meet the same gate however it was
+                    # typed. Below the inclusion threshold, so the plan asks.
+                    add(EntityType.PERSON, plain, 0.6, plain,
+                        notes="name-shaped bare query — declare a basis to run")
+                else:
+                    # 0.55 is exactly the include threshold: the seed is
+                    # runnable, and it is still the least confident thing the
+                    # extractor emits.
+                    add(EntityType.ORG, plain, 0.55, plain,
+                        notes="assumed from a bare query — uncheck if wrong")
 
     return hits
 

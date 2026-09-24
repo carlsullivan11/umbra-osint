@@ -24,7 +24,10 @@ _MAGIC: tuple[tuple[bytes, str], ...] = (
     (b"PK\x03\x04", "zip"),
     (b"GIF87a", "gif"),
     (b"GIF89a", "gif"),
+    (b"\xd0\xcf\x11\xe0", "ole"),
+    (b"\x1f\x8b", "gzip"),
     (b"RIFF", "riff"),
+    (b"BM", "bmp"),
 )
 
 _MAIL_HEADER_RE = re.compile(
@@ -33,7 +36,6 @@ _MAIL_HEADER_RE = re.compile(
     r"X-Originating-IP|List-Unsubscribe|X-Mailer|Content-Type)\s*:",
 )
 
-# One `From:` line is a fragment; several distinct headers is a message.
 _MIN_MAIL_HEADERS = 3
 
 _MAIL_EXTENSIONS = (".eml", ".email", ".mbox", ".mail", ".msg.txt", ".hdr")
@@ -45,10 +47,23 @@ class Kind(str, Enum):
     TEXT = "text"
     CSV = "csv"
     JSON = "json"
+    HTML = "html"
+    XML = "xml"
+    YAML = "yaml"
+    ICS = "ics"
+    VCF = "vcf"
     IMAGE = "image"
     OOXML = "ooxml"
+    ODF = "odf"
     PDF = "pdf"
     UNKNOWN = "unknown"
+
+
+TEXT_KINDS = {
+    Kind.TEXT, Kind.CSV, Kind.JSON, Kind.HTML, Kind.XML,
+    Kind.YAML, Kind.ICS, Kind.VCF,
+}
+META_KINDS = {Kind.IMAGE, Kind.OOXML, Kind.ODF, Kind.PDF}
 
 
 def decode(data: bytes) -> str:
@@ -74,7 +89,6 @@ def _magic(data: bytes) -> str | None:
     return None
 
 
-# Windows "Save As" writes UTF-16 with one of these in front of it.
 _UTF16_BOMS = (b"\xff\xfe", b"\xfe\xff")
 
 
@@ -101,8 +115,6 @@ def looks_like_mail(text: str, min_headers: int = _MIN_MAIL_HEADERS) -> bool:
     names = {m.group(1).lower() for m in _MAIL_HEADER_RE.finditer(head)}
     if len(names) < min_headers:
         return False
-    # Headers come first. If the matches only appear far into the file it is
-    # probably a log or a document quoting mail, not a message.
     first = _MAIL_HEADER_RE.search(head)
     return bool(first and first.start() < 2000)
 
@@ -126,17 +138,18 @@ def sniff(filename: str, data: bytes) -> Kind:
 
         if magic == "pdf":
             return Kind.PDF
-        if magic in {"jpeg", "png", "tiff", "gif"}:
+        if magic in {"jpeg", "png", "tiff", "gif", "bmp"}:
             return Kind.IMAGE
+        if magic == "riff":
+            return Kind.IMAGE if data[8:12] == b"WEBP" else Kind.UNKNOWN
         if magic == "zip":
             head = data[:8192]
+            if b"mimetypeapplication/vnd.oasis.opendocument" in head:
+                return Kind.ODF
             return Kind.OOXML if any(m in head for m in _OOXML_MEMBERS) else Kind.UNKNOWN
-        if magic == "riff":
+        if magic in {"ole", "gzip"}:
             return Kind.UNKNOWN
 
-        # A UTF-16 byte-order mark is positive evidence of text, so it settles
-        # the question before the byte-level heuristic gets to mistake the NULs
-        # for binary content.
         wide = data[:2] in _UTF16_BOMS
         if not wide and _looks_binary(data):
             return Kind.UNKNOWN
@@ -149,33 +162,38 @@ def sniff(filename: str, data: bytes) -> Kind:
             return Kind.EMAIL
 
         stripped = text.lstrip()
+        low = stripped[:64].lower()
+        if low.startswith(("<!doctype html", "<html")) or name.endswith((".html", ".htm")):
+            if low.startswith(("<!doctype html", "<html")) or name.endswith((".html", ".htm")):
+                return Kind.HTML
+        if stripped.startswith("<?xml") or name.endswith(".xml") or name.endswith(".svg"):
+            return Kind.XML
+        if stripped.upper().startswith("BEGIN:VCALENDAR") or name.endswith(".ics"):
+            return Kind.ICS
+        if stripped.upper().startswith("BEGIN:VCARD") or name.endswith((".vcf", ".vcard")):
+            return Kind.VCF
+
         if stripped[:1] in "{[":
             try:
                 json.loads(text)
                 return Kind.JSON
             except (ValueError, RecursionError):
-                pass  # a broken JSON file is still text worth reading
+                pass
 
-        # The name alone is only a claim, but the name *plus* real mail headers
-        # is enough. This matters for privacy, not tidiness: a clipped fragment
-        # with just `From:` and `To:` misses the three-header bar, and the
-        # generic text extractor that catches it has no idea which address is
-        # the sender — so it arms the recipient's own address and their
-        # employer's mail domain. The mail reader knows the difference.
         if name.endswith(_MAIL_EXTENSIONS) and looks_like_mail(text, min_headers=2):
             return Kind.EMAIL
 
         if name.endswith((".csv", ".tsv")) or _looks_like_csv(text):
             return Kind.CSV
 
-        # The extension gets the last word only when the content was ambiguous —
-        # an .eml with no recognisable headers is a text file, and calling it
-        # mail would produce an empty parse that reads as "nothing wrong here".
         if name.endswith(_MAIL_EXTENSIONS):
             return Kind.TEXT
 
-        if name.endswith(".json"):
+        if name.endswith(".json") or name.endswith(".ndjson") or name.endswith(".jsonl"):
             return Kind.JSON
+
+        if name.endswith((".yml", ".yaml")):
+            return Kind.YAML
 
         return Kind.TEXT
     except Exception:  # noqa: BLE001 - detection must never be the thing that fails

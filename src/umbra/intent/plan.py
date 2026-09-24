@@ -37,6 +37,10 @@ _DOMAIN_CORE = [
     "crtsh",
     "security_txt",
     "html_links",
+    # After the owned and cheap sources, never before them. This is a
+    # rate-limited third-party API, and DNS/TLS/the lakes are why the run
+    # exists — they must not queue behind someone else's quota.
+    "urlscan_io",
     # A stranger on /reputation got this and a full investigation did not.
     "domain_reputation",
     # Last on purpose. A cached ransomware.live GET is the least essential
@@ -44,12 +48,30 @@ _DOMAIN_CORE = [
     # queue behind a third-party feed having a bad day.
     "ransomware_exposure",
 ]
-_IP_CORE = ["rdap_ip", "asn_cymru", "ip_geo", "ip_reputation", "malware_infra"]
-_EMAIL_CORE = ["email_split", "gravatar"]
+_IP_CORE = [
+    "rdap_ip", "asn_cymru", "ip_geo", "ip_reputation", "malware_infra",
+    # Last, and after malware_infra: it is a third-party index read, so the
+    # owned lakes and the registries answer first. Reading Shodan's index is
+    # not `umbra scan ports` and carries none of that command's authorization
+    # gate — see docs/INTERNETDB.md.
+    "internetdb",
+]
+# email_profile first: it is offline and free, and what it says about the
+# address (role account, disposable, delivery form) frames everything after it.
+_EMAIL_CORE = ["email_profile", "email_split", "gravatar"]
 _GH = ["github_user", "github_commits"]
 _USER = ["username_presence"]
-_ORG = ["wikidata", "edgar_search", "opencorporates", "public_records_portals"]
-_PERSON = ["public_records_portals", "county_records", "wifi_maps", "sex_offender_registry", "obituary_search", "court_records", "ddg_search", "wikidata", "edgar_search"]
+# opencorporates is deliberately absent. 31 evidence rows on production,
+# every one a captcha wall — it has never returned data. OpenCorporates
+# challenges datacenter IPs and the deployment is one, so the failure is
+# structural, not a bad week. Still registered and selectable by name for
+# CLI users on residential connections; just not worth a request here.
+_ORG = ["wikidata", "edgar_search", "public_records_portals"]
+# people_lake first: it is offline and free, and what Umbra already owns
+# should answer before anything reaches out. 2.25M FEC contributors were
+# reachable from no collector at all, so a person search returned 18 portal
+# links and an EDGAR miss while the corpus sat one call away.
+_PERSON = ["people_lake", "public_records_portals", "county_records", "wifi_maps", "sex_offender_registry", "animal_registry", "inmate_locator", "obituary_search", "court_records", "ddg_search", "wikidata", "edgar_search"]
 
 _REFUSE_RE = re.compile(
     r"(?i)\b("
@@ -84,6 +106,12 @@ def select_collectors(
         # DNS/HTML pivots produce IPs — run the passive IP set so Phase B
         # coverage does not wait on the daily backfill timer.
         add_many(_IP_CORE)
+    if EntityType.URL in types:
+        # Explicit as well as via _DOMAIN_CORE. Someone pasting a URL is asking
+        # "what is this", and an existing public scan is the cheapest real
+        # answer available without opening a connection to the target — so it
+        # survives any later trim of the domain bundle. add_many dedupes.
+        add_many(["urlscan_io"])
     if EntityType.IP in types:
         add_many(_IP_CORE)
     if EntityType.EMAIL in types:
@@ -105,6 +133,11 @@ def select_collectors(
         add_many(["phone_validate"])
     if EntityType.CRYPTO_ADDRESS in types:
         add_many(["crypto_screen"])
+    if EntityType.AIRCRAFT in types:
+        # The owned FAA registry lake, and only that. No ADS-B, no commercial
+        # flight-tracking API: this answers "who holds the registration", which
+        # is a records question, not a where-is-it-now question.
+        add_many(["faa_registry"])
     if EntityType.ORG in types or flags.want_corp_records:
         add_many(_ORG)
     if EntityType.PERSON in types:
@@ -118,11 +151,14 @@ def select_collectors(
     if flags.want_wayback:
         add_many(["wayback_cdx"])
 
-    # The web-search fallback exists for seeds nothing else handles. MAC and
-    # phone are offline table/plan reads, so those plans must not quietly
-    # become a person web-search.
+    # The web-search fallback exists for seeds nothing else handles. MAC,
+    # phone, crypto and aircraft are offline table reads, so those plans must
+    # not quietly become a person web-search. An N-number did exactly that
+    # before it had a type: it fell through to the bare-org guess and the
+    # "investigation" was a DuckDuckGo query for the string.
     if not out and values and not types.issubset(
-        {EntityType.MAC, EntityType.PHONE, EntityType.CRYPTO_ADDRESS}
+        {EntityType.MAC, EntityType.PHONE, EntityType.CRYPTO_ADDRESS,
+         EntityType.AIRCRAFT}
     ):
         add_many(["ddg_search"])
 

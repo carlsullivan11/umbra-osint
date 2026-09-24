@@ -218,3 +218,15 @@ def test_an_analyst_can_deliberately_arm_the_recipient_side(workdir):
 def test_a_bad_basis_is_rejected(workdir):
     result = run("email", "example.email", "--basis", "whatever")
     assert result.exit_code != 0
+
+
+def test_search_reads_identifiers_from_a_txt(workdir):
+    result = run("search", "iocs.txt")
+    assert result.exit_code == 0
+    assert "185.199.108.153" in result.stdout
+
+
+def test_analyze_reads_an_email(workdir):
+    result = run("analyze", "example.email")
+    assert result.exit_code == 0
+    assert "yourbank.example" in result.stdout
